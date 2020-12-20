@@ -1,13 +1,13 @@
-package ru.svgogin.service.sparkservice;
+package ru.svgogin.service.spark;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SparkServiceApplication {
+public class SparkApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SparkServiceApplication.class, args);
+		SpringApplication.run(SparkApplication.class, args);
 	}
 
 }

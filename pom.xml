@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ru.svgogin.service</groupId>
-	<artifactId>spark-service</artifactId>
+	<artifactId>spark</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>spark-service</name>
+	<name>spark</name>
 	<description>Spark service for study purposes</description>
 
 	<properties>

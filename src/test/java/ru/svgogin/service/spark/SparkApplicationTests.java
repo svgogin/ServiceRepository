@@ -1,10 +1,10 @@
-package ru.svgogin.service.sparkservice;
+package ru.svgogin.service.spark;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SparkServiceApplicationTests {
+class SparkApplicationTests {
 
 	@Test
 	void contextLoads() {
