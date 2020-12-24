@@ -6,8 +6,6 @@ import ru.svgogin.service.spark.entity.Company;
 import javax.annotation.PostConstruct;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -24,25 +22,28 @@ public class SparkService {
     save(new Company("7725038124","1037739527077","770401001","АКЦИОНЕРНОЕ ОБЩЕСТВО \"БАНК ДОМ.РФ\"","АО\"БАНК ДОМ.РФ\"","Действующая",
         new Date()));
   }
+
   public Iterable<Company> findAll() {
     return COMPANY_MAP.values();
   }
+
   public void save(Company company) {
     if (COMPANY_MAP.containsKey(company.getInn())) {
       throw new IllegalArgumentException("Company inn = " + company.getInn() + " already exists");
     }
     COMPANY_MAP.put(company.getInn(), company);
   }
+
   public Company findByInn(String inn) {
     return COMPANY_MAP.get(inn);
   }
   private Company toEntity(CompanyDto companyDto) {
-    return new Company(companyDto.getInn(), companyDto.getOgrn(), companyDto.getKpp(), companyDto.getFull_name_rus(),
-        companyDto.getShort_name_rus(), companyDto.getStatus_name(), companyDto.getStatus_date());
+    return new Company(companyDto.getInn(), companyDto.getOgrn(), companyDto.getKpp(), companyDto.getFullNameRus(),
+        companyDto.getShortNameRus(), companyDto.getStatusName(), companyDto.getStatusDate());
   }
 
   private CompanyDto toDto(Company company) {
-    return new CompanyDto(company.getInn(), company.getOgrn(), company.getKpp(), company.getFull_name_rus(),
-        company.getShort_name_rus(), company.getStatus_name(), company.getStatus_date());
+    return new CompanyDto(company.getInn(), company.getOgrn(), company.getKpp(), company.getFullNameRus(),
+        company.getShortNameRus(), company.getStatusName(), company.getStatusDate());
   }
 }
