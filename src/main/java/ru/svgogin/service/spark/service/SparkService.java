@@ -4,9 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.svgogin.service.spark.dto.CompanyDto;
 import ru.svgogin.service.spark.entity.Company;
 import javax.annotation.PostConstruct;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -16,11 +14,11 @@ public class SparkService {
   private final Map<String, Company> COMPANY_MAP = new LinkedHashMap<>();
 
   @PostConstruct
-  public void init() throws ParseException {
+  public void init() {
     save(new Company("7729355614","1027700262270","770401001","АКЦИОНЕРНОЕ ОБЩЕСТВО \"ДОМ.РФ\"","АО\"ДОМ.РФ\"","Действующая",
-        new SimpleDateFormat("yyyy-MM-dd").parse("2020-12-20")));
+        LocalDate.of(2020,12,31)));
     save(new Company("7725038124","1037739527077","770401001","АКЦИОНЕРНОЕ ОБЩЕСТВО \"БАНК ДОМ.РФ\"","АО\"БАНК ДОМ.РФ\"","Действующая",
-        new Date()));
+        LocalDate.of(2020,11,30)));
   }
 
   public Iterable<Company> findAll() {

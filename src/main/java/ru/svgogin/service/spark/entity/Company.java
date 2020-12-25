@@ -1,5 +1,6 @@
 package ru.svgogin.service.spark.entity;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Company {
@@ -9,10 +10,10 @@ public class Company {
   private String fullNameRus;
   private String shortNameRus;
   private String statusName;
-  private Date statusDate;
+  private LocalDate statusDate;
 
   public Company(String inn, String ogrn, String kpp, String fullNameRus, String shortNameRus, String statusName,
-                 Date statusDate) {
+                 LocalDate statusDate) {
     this.inn = inn;
     this.ogrn = ogrn;
     this.kpp = kpp;
@@ -46,7 +47,7 @@ public class Company {
     return statusName;
   }
 
-  public Date getStatusDate() {
+  public LocalDate getStatusDate() {
     return statusDate;
   }
 }

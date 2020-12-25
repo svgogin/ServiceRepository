@@ -1,5 +1,6 @@
 package ru.svgogin.service.spark.dto;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class CompanyDto {
@@ -9,10 +10,10 @@ public class CompanyDto {
   private final String fullNameRus;
   private final String shortNameRus;
   private final String statusName;
-  private final Date statusDate;
+  private final LocalDate statusDate;
 
   public CompanyDto(String inn, String ogrn, String kpp, String fullNameRus, String shortNameRus, String statusName,
-                    Date statusDate) {
+                    LocalDate statusDate) {
     this.inn = inn;
     this.ogrn = ogrn;
     this.kpp = kpp;
@@ -46,7 +47,7 @@ public class CompanyDto {
     return statusName;
   }
 
-  public Date getStatusDate() {
+  public LocalDate getStatusDate() {
     return statusDate;
   }
 }
