@@ -4,13 +4,13 @@ import java.time.LocalDate;
 import java.util.Date;
 
 public class Company {
-  private String inn;
-  private String ogrn;
-  private String kpp;
-  private String fullNameRus;
-  private String shortNameRus;
-  private String statusName;
-  private LocalDate statusDate;
+  private final String inn;
+  private final String ogrn;
+  private final String kpp;
+  private final String fullNameRus;
+  private final String shortNameRus;
+  private final String statusName;
+  private final LocalDate statusDate;
 
   public Company(String inn, String ogrn, String kpp, String fullNameRus, String shortNameRus, String statusName,
                  LocalDate statusDate) {
