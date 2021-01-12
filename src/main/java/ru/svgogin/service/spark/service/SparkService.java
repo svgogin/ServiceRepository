@@ -1,47 +1,61 @@
 package ru.svgogin.service.spark.service;
 
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import ru.svgogin.service.spark.dto.CompanyDto;
 import ru.svgogin.service.spark.entity.Company;
-import javax.annotation.PostConstruct;
-import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import ru.svgogin.service.spark.repository.SparkRepository;
 
 
 @Service
 public class SparkService {
-  private final Map<String, Company> COMPANY_MAP = new LinkedHashMap<>();
+  private final SparkRepository sparkRepository;
 
-  @PostConstruct
-  public void init() {
-    save(new Company("7729355614","1027700262270","770401001","АКЦИОНЕРНОЕ ОБЩЕСТВО \"ДОМ.РФ\"","АО\"ДОМ.РФ\"","Действующая",
-        LocalDate.of(2020,12,31)));
-    save(new Company("7725038124","1037739527077","770401001","АКЦИОНЕРНОЕ ОБЩЕСТВО \"БАНК ДОМ.РФ\"","АО\"БАНК ДОМ.РФ\"","Действующая",
-        LocalDate.of(2020,11,30)));
+  public SparkService(SparkRepository sparkRepository) {
+    this.sparkRepository = sparkRepository;
   }
 
-  public Iterable<Company> findAll() {
-    return COMPANY_MAP.values();
+  public Iterable<CompanyDto> findAll() {
+    Iterable<Company> companies = sparkRepository.findAll();
+    return StreamSupport.stream(companies.spliterator(), false)
+        .map(this::toDto)
+        .collect(Collectors.toList());
   }
 
-  public void save(Company company) {
-    if (COMPANY_MAP.containsKey(company.getInn())) {
-      throw new IllegalArgumentException("Company inn = " + company.getInn() + " already exists");
-    }
-    COMPANY_MAP.put(company.getInn(), company);
+  public CompanyDto findByInn(String inn) {
+    return toDto(sparkRepository.findByInn(inn));
   }
 
-  public Company findByInn(String inn) {
-    return COMPANY_MAP.get(inn);
+  public CompanyDto update(String inn, CompanyDto companyDto) {
+    return toDto(sparkRepository.update(inn, toEntity(companyDto)));
   }
+
+  public CompanyDto save(CompanyDto companyDto) {
+    return toDto(sparkRepository.save(toEntity(companyDto)));
+  }
+
+  public void delete(String inn) {
+    sparkRepository.delete(inn);
+  }
+
   private Company toEntity(CompanyDto companyDto) {
-    return new Company(companyDto.getInn(), companyDto.getOgrn(), companyDto.getKpp(), companyDto.getFullNameRus(),
-        companyDto.getShortNameRus(), companyDto.getStatusName(), companyDto.getStatusDate());
+    return new Company(companyDto.getInn(),
+        companyDto.getOgrn(),
+        companyDto.getKpp(),
+        companyDto.getFullNameRus(),
+        companyDto.getShortNameRus(),
+        companyDto.getStatusName(),
+        companyDto.getStatusDate());
   }
 
   private CompanyDto toDto(Company company) {
-    return new CompanyDto(company.getInn(), company.getOgrn(), company.getKpp(), company.getFullNameRus(),
-        company.getShortNameRus(), company.getStatusName(), company.getStatusDate());
+    return new CompanyDto(company.getInn(),
+        company.getOgrn(),
+        company.getKpp(),
+        company.getFullNameRus(),
+        company.getShortNameRus(),
+        company.getStatusName(),
+        company.getStatusDate());
   }
 }

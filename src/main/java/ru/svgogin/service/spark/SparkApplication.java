@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SparkApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SparkApplication.class, args);
-	}
+  public static void main(String[] args) {
+    SpringApplication.run(SparkApplication.class, args);
+  }
 
 }
