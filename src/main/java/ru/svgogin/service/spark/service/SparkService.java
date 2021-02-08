@@ -1,42 +1,59 @@
 package ru.svgogin.service.spark.service;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.stereotype.Service;
 import ru.svgogin.service.spark.dto.CompanyDto;
 import ru.svgogin.service.spark.entity.Company;
-import ru.svgogin.service.spark.repository.SparkRepository;
-
+import ru.svgogin.service.spark.repository.SparkRepositoryDb;
 
 @Service
 public class SparkService {
-  private final SparkRepository sparkRepository;
+  private static final Logger log = LoggerFactory.getLogger(SparkService.class);
+  private final SparkRepositoryDb sparkRepositoryDb;
+  private final JdbcAggregateTemplate aggregateTemplate;
 
-  public SparkService(SparkRepository sparkRepository) {
-    this.sparkRepository = sparkRepository;
+  public SparkService(SparkRepositoryDb sparkRepositoryDb,
+                      JdbcAggregateTemplate aggregateTemplate) {
+    this.sparkRepositoryDb = sparkRepositoryDb;
+    this.aggregateTemplate = aggregateTemplate;
   }
 
   public Iterable<CompanyDto> findAll() {
-    Iterable<Company> companies = sparkRepository.findAll();
+    Iterable<Company> companies = sparkRepositoryDb.findAll();
     return StreamSupport.stream(companies.spliterator(), false)
         .map(this::toDto)
         .collect(Collectors.toList());
   }
 
-  public CompanyDto findByInn(String inn) {
-    return toDto(sparkRepository.findByInn(inn));
+  public Optional<CompanyDto> findByInn(String inn) {
+    return sparkRepositoryDb.findByInn(inn).map(this::toDto);
   }
 
   public CompanyDto update(String inn, CompanyDto companyDto) {
-    return toDto(sparkRepository.update(inn, toEntity(companyDto)));
+    if (sparkRepositoryDb.existsByInn(inn)) {
+      return toDto(aggregateTemplate.update(toEntity(companyDto)));
+    } else {
+      throw new IllegalArgumentException("Company with Inn = " + inn + " doesn't exist");
+    }
   }
 
   public CompanyDto save(CompanyDto companyDto) {
-    return toDto(sparkRepository.save(toEntity(companyDto)));
+    Company company = this.toEntity(companyDto);
+    if (sparkRepositoryDb.existsByInn(company.getInn())) {
+      throw new IllegalArgumentException("Company with Inn = "
+                                         + company.getInn()
+                                         + " already exists");
+    } else {
+      return toDto(aggregateTemplate.insert(company));
+    }
   }
 
-  public void delete(String inn) {
-    sparkRepository.delete(inn);
+  public void delete(String inn) { sparkRepositoryDb.deleteByInn(inn);
   }
 
   private Company toEntity(CompanyDto companyDto) {
