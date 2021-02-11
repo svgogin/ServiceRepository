@@ -4,33 +4,35 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
 
 public class Company {
+  @Id
+  private BigInteger id;
   @Column("inn")
   private final String inn;
   @Column("ogrn")
   private final String ogrn;
   @Column("kpp")
   private final String kpp;
-  @Column("fullnamerus")
+  @Column("full_name_rus")
   private final String fullNameRus;
-  @Column("shortnamerus")
+  @Column("short_name_rus")
   private final String shortNameRus;
-  @Column("statusname")
+  @Column("status_name")
   private final String statusName;
-  @Column("statusdate")
+  @Column("status_date")
   private final LocalDate statusDate;
-  @Id
-  @Column("id")
-  private BigInteger id;
 
-  public Company(String inn,
-                 String ogrn,
-                 String kpp,
-                 String fullNameRus,
-                 String shortNameRus,
-                 String statusName,
-                 LocalDate statusDate) {
+  public Company(
+      String inn,
+      String ogrn,
+      String kpp,
+      String fullNameRus,
+      String shortNameRus,
+      String statusName,
+      LocalDate statusDate) {
     this.inn = inn;
     this.ogrn = ogrn;
     this.kpp = kpp;
@@ -41,30 +43,30 @@ public class Company {
   }
 
   public String getInn() {
-    return this.inn;
+    return inn;
   }
 
   public String getOgrn() {
-    return this.ogrn;
+    return ogrn;
   }
 
   public String getKpp() {
-    return this.kpp;
+    return kpp;
   }
 
   public String getFullNameRus() {
-    return this.fullNameRus;
+    return fullNameRus;
   }
 
   public String getShortNameRus() {
-    return this.shortNameRus;
+    return shortNameRus;
   }
 
   public String getStatusName() {
-    return this.statusName;
+    return statusName;
   }
 
   public LocalDate getStatusDate() {
-    return this.statusDate;
+    return statusDate;
   }
 }

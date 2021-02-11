@@ -24,18 +24,18 @@ public class SparkService {
   }
 
   public Iterable<CompanyDto> findAll() {
-    Iterable<Company> companies = this.sparkRepositoryDb.findAll();
+    Iterable<Company> companies = sparkRepositoryDb.findAll();
     return StreamSupport.stream(companies.spliterator(), false)
         .map(this::toDto)
         .collect(Collectors.toList());
   }
 
   public Optional<CompanyDto> findByInn(String inn) {
-    return this.sparkRepositoryDb.findByInn(inn).map(this::toDto);
+    return sparkRepositoryDb.findByInn(inn).map(this::toDto);
   }
 
   public CompanyDto update(String inn, CompanyDto companyDto) {
-    if (this.sparkRepositoryDb.existsByInn(inn)) {
+    if (sparkRepositoryDb.existsByInn(inn)) {
       return toDto(aggregateTemplate.update(toEntity(companyDto)));
     } else {
       throw new IllegalArgumentException("Company with Inn = " + inn + " doesn't exist");
@@ -44,7 +44,7 @@ public class SparkService {
 
   public CompanyDto save(CompanyDto companyDto) {
     Company company = this.toEntity(companyDto);
-    if (this.sparkRepositoryDb.existsByInn(company.getInn())) {
+    if (sparkRepositoryDb.existsByInn(company.getInn())) {
       throw new IllegalArgumentException("Company with Inn = "
                                          + company.getInn()
                                          + " already exists");
@@ -54,11 +54,12 @@ public class SparkService {
   }
 
   public void delete(String inn) {
-    this.sparkRepositoryDb.deleteByInn(inn);
+    sparkRepositoryDb.deleteByInn(inn);
   }
 
   private Company toEntity(CompanyDto companyDto) {
-    return new Company(companyDto.getInn(),
+    return new Company(
+        companyDto.getInn(),
         companyDto.getOgrn(),
         companyDto.getKpp(),
         companyDto.getFullNameRus(),
