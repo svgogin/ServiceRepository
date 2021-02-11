@@ -28,30 +28,30 @@ public class CompanyDto {
   }
 
   public String getInn() {
-    return this.inn;
+    return inn;
   }
 
   public String getOgrn() {
-    return this.ogrn;
+    return ogrn;
   }
 
   public String getKpp() {
-    return this.kpp;
+    return kpp;
   }
 
   public String getFullNameRus() {
-    return this.fullNameRus;
+    return fullNameRus;
   }
 
   public String getShortNameRus() {
-    return this.shortNameRus;
+    return shortNameRus;
   }
 
   public String getStatusName() {
-    return this.statusName;
+    return statusName;
   }
 
   public LocalDate getStatusDate() {
-    return this.statusDate;
+    return statusDate;
   }
 }
