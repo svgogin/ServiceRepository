@@ -1,5 +1,6 @@
 package ru.svgogin.service.spark.service;
 
+import java.math.BigInteger;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -36,7 +37,8 @@ public class SparkService {
 
   public CompanyDto update(String inn, CompanyDto companyDto) {
     if (sparkRepositoryDb.existsByInn(inn)) {
-      return toDto(aggregateTemplate.update(toEntity(companyDto)));
+      Company company = this.toEntity(companyDto);
+      return toDto(aggregateTemplate.update(company));
     } else {
       throw new IllegalArgumentException("Company with Inn = " + inn + " doesn't exist");
     }
@@ -58,7 +60,9 @@ public class SparkService {
   }
 
   private Company toEntity(CompanyDto companyDto) {
+    //BigInteger idupd = sparkRepositoryDb.findByInn(inn[0])
     return new Company(
+        sparkRepositoryDb.findByInn(companyDto.getInn()).orElseThrow().getId(),
         companyDto.getInn(),
         companyDto.getOgrn(),
         companyDto.getKpp(),
