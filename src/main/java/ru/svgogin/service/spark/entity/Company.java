@@ -25,7 +25,8 @@ public class Company {
   @Column("status_date")
   private final LocalDate statusDate;
 
-  public Company(
+    public Company(
+      BigInteger id,
       String inn,
       String ogrn,
       String kpp,
@@ -33,6 +34,7 @@ public class Company {
       String shortNameRus,
       String statusName,
       LocalDate statusDate) {
+    this.id = id;
     this.inn = inn;
     this.ogrn = ogrn;
     this.kpp = kpp;
@@ -40,6 +42,10 @@ public class Company {
     this.shortNameRus = shortNameRus;
     this.statusName = statusName;
     this.statusDate = statusDate;
+  }
+
+  public BigInteger getId() {
+    return id;
   }
 
   public String getInn() {

@@ -13,4 +13,5 @@ public interface SparkRepositoryDb extends CrudRepository<Company, BigInteger> {
   boolean existsByInn(String inn);
 
   void deleteByInn(String inn);
+
 }
