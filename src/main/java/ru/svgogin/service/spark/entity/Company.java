@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.data.relational.core.mapping.Table;
 
 
 public class Company {
@@ -25,7 +24,7 @@ public class Company {
   @Column("status_date")
   private final LocalDate statusDate;
 
-    public Company(
+  public Company(
       BigInteger id,
       String inn,
       String ogrn,

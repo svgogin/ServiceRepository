@@ -37,7 +37,8 @@ public class SparkService {
 
   public CompanyDto update(String inn, CompanyDto companyDto) {
     if (sparkRepositoryDb.existsByInn(inn)) {
-      Company company = this.toEntity(companyDto);
+      Company companyForUpdate = sparkRepositoryDb.findByInn(inn).orElseThrow();
+      Company company = actualize(companyForUpdate, companyDto);
       return toDto(aggregateTemplate.update(company));
     } else {
       throw new IllegalArgumentException("Company with Inn = " + inn + " doesn't exist");
@@ -45,7 +46,7 @@ public class SparkService {
   }
 
   public CompanyDto save(CompanyDto companyDto) {
-    Company company = this.toEntity(companyDto);
+    Company company = toEntity(companyDto);
     if (sparkRepositoryDb.existsByInn(company.getInn())) {
       throw new IllegalArgumentException("Company with Inn = "
                                          + company.getInn()
@@ -56,13 +57,19 @@ public class SparkService {
   }
 
   public void delete(String inn) {
-    sparkRepositoryDb.deleteByInn(inn);
+    if (sparkRepositoryDb.existsByInn(inn)) {
+      BigInteger id = sparkRepositoryDb.findByInn(inn).orElseThrow().getId();
+      sparkRepositoryDb.deleteById(id);
+    } else {
+      throw new IllegalArgumentException("Company with Inn = "
+                                         + inn
+                                         + " doesn't exist");
+    }
   }
 
   private Company toEntity(CompanyDto companyDto) {
-    //BigInteger idupd = sparkRepositoryDb.findByInn(inn[0])
     return new Company(
-        sparkRepositoryDb.findByInn(companyDto.getInn()).orElseThrow().getId(),
+        null,
         companyDto.getInn(),
         companyDto.getOgrn(),
         companyDto.getKpp(),
@@ -73,12 +80,25 @@ public class SparkService {
   }
 
   private CompanyDto toDto(Company company) {
-    return new CompanyDto(company.getInn(),
+    return new CompanyDto(
+        company.getInn(),
         company.getOgrn(),
         company.getKpp(),
         company.getFullNameRus(),
         company.getShortNameRus(),
         company.getStatusName(),
         company.getStatusDate());
+  }
+
+  private Company actualize(Company company, CompanyDto companyDto) {
+    return new Company(
+        company.getId(),
+        companyDto.getInn() != null ? companyDto.getInn() : company.getInn(),
+        companyDto.getOgrn() != null ? companyDto.getOgrn() : company.getOgrn(),
+        companyDto.getKpp() != null ? companyDto.getKpp() : company.getKpp(),
+        companyDto.getFullNameRus() != null ? companyDto.getFullNameRus() : company.getFullNameRus(),
+        companyDto.getShortNameRus() != null ? companyDto.getShortNameRus() : company.getShortNameRus(),
+        companyDto.getStatusName() != null ? companyDto.getStatusName() : company.getStatusName(),
+        companyDto.getStatusDate() != null ? companyDto.getStatusDate() : company.getStatusDate());
   }
 }
