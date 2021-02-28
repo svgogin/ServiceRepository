@@ -1,6 +1,7 @@
 package ru.svgogin.service.spark.web;
 
-import java.util.Optional;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,8 +29,12 @@ public class SparkController {
   }
 
   @GetMapping("/{inn}")
-  public Optional<CompanyDto> getCompanyByInn(@PathVariable("inn") String inn) {
-    return sparkService.findByInn(inn);
+  public ResponseEntity<CompanyDto> getCompanyByInn(@PathVariable("inn") String inn) {
+    if (sparkService.findByInn(inn).isPresent()) {
+      return ResponseEntity.ok(sparkService.findByInn(inn).get());
+    } else {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
   }
 
   @PostMapping()

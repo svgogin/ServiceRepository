@@ -1,5 +1,7 @@
 package ru.svgogin.service.spark.service;
 
+import static java.util.Objects.requireNonNullElse;
+
 import java.math.BigInteger;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,9 +38,9 @@ public class SparkService {
   }
 
   public CompanyDto update(String inn, CompanyDto companyDto) {
-    if (sparkRepositoryDb.existsByInn(inn)) {
-      Company companyForUpdate = sparkRepositoryDb.findByInn(inn).orElseThrow();
-      Company company = actualize(companyForUpdate, companyDto);
+    var companyForUpdate = sparkRepositoryDb.findByInn(inn);
+    if (companyForUpdate.isPresent()) {
+      Company company = actualize(companyForUpdate.get(), companyDto);
       return toDto(aggregateTemplate.update(company));
     } else {
       throw new IllegalArgumentException("Company with Inn = " + inn + " doesn't exist");
@@ -57,8 +59,9 @@ public class SparkService {
   }
 
   public void delete(String inn) {
-    if (sparkRepositoryDb.existsByInn(inn)) {
-      BigInteger id = sparkRepositoryDb.findByInn(inn).orElseThrow().getId();
+    var companyOptional = sparkRepositoryDb.findByInn(inn);
+    if (companyOptional.isPresent()) {
+      BigInteger id = companyOptional.get().getId();
       sparkRepositoryDb.deleteById(id);
     } else {
       throw new IllegalArgumentException("Company with Inn = "
@@ -93,12 +96,12 @@ public class SparkService {
   private Company actualize(Company company, CompanyDto companyDto) {
     return new Company(
         company.getId(),
-        companyDto.getInn() != null ? companyDto.getInn() : company.getInn(),
-        companyDto.getOgrn() != null ? companyDto.getOgrn() : company.getOgrn(),
-        companyDto.getKpp() != null ? companyDto.getKpp() : company.getKpp(),
-        companyDto.getFullNameRus() != null ? companyDto.getFullNameRus() : company.getFullNameRus(),
-        companyDto.getShortNameRus() != null ? companyDto.getShortNameRus() : company.getShortNameRus(),
-        companyDto.getStatusName() != null ? companyDto.getStatusName() : company.getStatusName(),
-        companyDto.getStatusDate() != null ? companyDto.getStatusDate() : company.getStatusDate());
+        requireNonNullElse(companyDto.getInn(), company.getInn()),
+        requireNonNullElse(companyDto.getOgrn(), company.getOgrn()),
+        requireNonNullElse(companyDto.getKpp(), company.getKpp()),
+        requireNonNullElse(companyDto.getFullNameRus(), company.getFullNameRus()),
+        requireNonNullElse(companyDto.getShortNameRus(), company.getShortNameRus()),
+        requireNonNullElse(companyDto.getStatusName(), company.getStatusName()),
+        requireNonNullElse(companyDto.getStatusDate(), company.getStatusDate()));
   }
 }
