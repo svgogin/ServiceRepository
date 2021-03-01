@@ -61,11 +61,6 @@ class SparkServiceTest {
     sparkService = new SparkService(sparkRepositoryDb, aggregateTemplate);
   }
 
-  @AfterEach
-  void tearDown() {
-    System.out.println("tear down");
-  }
-
   @Test
   @DisplayName("findAll should call repository.findAll")
   void findAllShouldCallRepository() {

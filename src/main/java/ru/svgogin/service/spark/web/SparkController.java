@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.svgogin.service.spark.dto.CompanyDto;
 import ru.svgogin.service.spark.service.SparkService;
+import java.util.function.Supplier;
 
 
 @RestController
@@ -30,11 +31,8 @@ public class SparkController {
 
   @GetMapping("/{inn}")
   public ResponseEntity<CompanyDto> getCompanyByInn(@PathVariable("inn") String inn) {
-    if (sparkService.findByInn(inn).isPresent()) {
-      return ResponseEntity.ok(sparkService.findByInn(inn).get());
-    } else {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
+    var company = sparkService.findByInn(inn);
+    return company.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
   @PostMapping()
