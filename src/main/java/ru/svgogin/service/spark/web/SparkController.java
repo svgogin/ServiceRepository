@@ -1,5 +1,6 @@
 package ru.svgogin.service.spark.web;
 
+import java.math.BigInteger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.svgogin.service.spark.dto.CompanyDto;
 import ru.svgogin.service.spark.service.SparkService;
-import java.util.function.Supplier;
 
 
 @RestController
@@ -32,7 +32,8 @@ public class SparkController {
   @GetMapping("/{inn}")
   public ResponseEntity<CompanyDto> getCompanyByInn(@PathVariable("inn") String inn) {
     var company = sparkService.findByInn(inn);
-    return company.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    return company.map(ResponseEntity::ok).orElseGet(() ->
+        new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
   @PostMapping()
@@ -41,13 +42,23 @@ public class SparkController {
   }
 
   @PutMapping("/{inn}")
-  public CompanyDto updateCompany(@PathVariable("inn") String inn,
-                                  @RequestBody CompanyDto companyDto) {
-    return sparkService.update(inn, companyDto);
+  public ResponseEntity<CompanyDto> updateCompany(@PathVariable("inn") String inn,
+                                                  @RequestBody CompanyDto companyDto) {
+    var companyFromDb = sparkService.findByInn(inn);
+    return companyFromDb.map(dto ->
+        new ResponseEntity<>(sparkService.update(dto, companyDto), HttpStatus.OK))
+        .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
   @DeleteMapping("/{inn}")
-  public void deleteCompany(@PathVariable("inn") String inn) {
-    sparkService.delete(inn);
+  public ResponseEntity<CompanyDto> deleteCompany(@PathVariable("inn") String inn) {
+    var companyOptional = sparkService.findByInn(inn);
+    if (companyOptional.isPresent()) {
+      BigInteger id = companyOptional.get().getId();
+      sparkService.delete(id);
+      return new ResponseEntity<>(companyOptional.get(), HttpStatus.OK);
+    } else {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
   }
 }

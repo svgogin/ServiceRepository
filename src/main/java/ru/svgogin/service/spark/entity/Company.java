@@ -7,8 +7,6 @@ import org.springframework.data.relational.core.mapping.Column;
 
 
 public class Company {
-  @Id
-  private BigInteger id;
   @Column("inn")
   private final String inn;
   @Column("ogrn")
@@ -23,6 +21,8 @@ public class Company {
   private final String statusName;
   @Column("status_date")
   private final LocalDate statusDate;
+  @Id
+  private final BigInteger id;
 
   public Company(
       BigInteger id,

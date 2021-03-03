@@ -37,14 +37,9 @@ public class SparkService {
     return sparkRepositoryDb.findByInn(inn).map(this::toDto);
   }
 
-  public CompanyDto update(String inn, CompanyDto companyDto) {
-    var companyForUpdate = sparkRepositoryDb.findByInn(inn);
-    if (companyForUpdate.isPresent()) {
-      Company company = actualize(companyForUpdate.get(), companyDto);
-      return toDto(aggregateTemplate.update(company));
-    } else {
-      throw new IllegalArgumentException("Company with Inn = " + inn + " doesn't exist");
-    }
+  public CompanyDto update(CompanyDto companyFromDb, CompanyDto companyDto) {
+    Company companyForUpdate = actualize(companyFromDb, companyDto);
+    return toDto(aggregateTemplate.update(companyForUpdate));
   }
 
   public CompanyDto save(CompanyDto companyDto) {
@@ -58,16 +53,8 @@ public class SparkService {
     }
   }
 
-  public void delete(String inn) {
-    var companyOptional = sparkRepositoryDb.findByInn(inn);
-    if (companyOptional.isPresent()) {
-      BigInteger id = companyOptional.get().getId();
-      sparkRepositoryDb.deleteById(id);
-    } else {
-      throw new IllegalArgumentException("Company with Inn = "
-                                         + inn
-                                         + " doesn't exist");
-    }
+  public void delete(BigInteger id) {
+    sparkRepositoryDb.deleteById(id);
   }
 
   private Company toEntity(CompanyDto companyDto) {
@@ -84,6 +71,7 @@ public class SparkService {
 
   private CompanyDto toDto(Company company) {
     return new CompanyDto(
+        company.getId(),
         company.getInn(),
         company.getOgrn(),
         company.getKpp(),
@@ -93,15 +81,15 @@ public class SparkService {
         company.getStatusDate());
   }
 
-  private Company actualize(Company company, CompanyDto companyDto) {
+  private Company actualize(CompanyDto companyFromDb, CompanyDto companyDto) {
     return new Company(
-        company.getId(),
-        requireNonNullElse(companyDto.getInn(), company.getInn()),
-        requireNonNullElse(companyDto.getOgrn(), company.getOgrn()),
-        requireNonNullElse(companyDto.getKpp(), company.getKpp()),
-        requireNonNullElse(companyDto.getFullNameRus(), company.getFullNameRus()),
-        requireNonNullElse(companyDto.getShortNameRus(), company.getShortNameRus()),
-        requireNonNullElse(companyDto.getStatusName(), company.getStatusName()),
-        requireNonNullElse(companyDto.getStatusDate(), company.getStatusDate()));
+        companyFromDb.getId(),
+        requireNonNullElse(companyDto.getInn(), companyFromDb.getInn()),
+        requireNonNullElse(companyDto.getOgrn(), companyFromDb.getOgrn()),
+        requireNonNullElse(companyDto.getKpp(), companyFromDb.getKpp()),
+        requireNonNullElse(companyDto.getFullNameRus(), companyFromDb.getFullNameRus()),
+        requireNonNullElse(companyDto.getShortNameRus(), companyFromDb.getShortNameRus()),
+        requireNonNullElse(companyDto.getStatusName(), companyFromDb.getStatusName()),
+        requireNonNullElse(companyDto.getStatusDate(), companyFromDb.getStatusDate()));
   }
 }
