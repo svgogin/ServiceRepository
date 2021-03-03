@@ -1,18 +1,19 @@
 package ru.svgogin.service.spark.service;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
@@ -22,9 +23,16 @@ import ru.svgogin.service.spark.repository.SparkRepositoryDb;
 
 class SparkServiceTest {
 
-  private SparkRepositoryDb sparkRepositoryDb;
-  private SparkService sparkService;
   private final Company bank = new Company(
+      BigInteger.valueOf(1),
+      "7725038124",
+      "1037739527077",
+      "770401001",
+      "АКЦИОНЕРНОЕ ОБЩЕСТВО \"БАНК ДОМ.РФ\"",
+      "АО\"БАНК ДОМ.РФ\"",
+      "Действующая",
+      LocalDate.of(2020, 11, 30));
+  private final CompanyDto bankFromDb = new CompanyDto(
       BigInteger.valueOf(1),
       "7725038124",
       "1037739527077",
@@ -43,6 +51,7 @@ class SparkServiceTest {
       "Actual",
       LocalDate.of(2021, 1, 30));
   private final CompanyDto bankDto = new CompanyDto(
+      BigInteger.valueOf(1),
       "07725038124",
       "01037739527077",
       "0770401001",
@@ -52,6 +61,8 @@ class SparkServiceTest {
       LocalDate.of(2020, 11, 30));
   private final JdbcAggregateTemplate aggregateTemplate = Mockito.mock(JdbcAggregateTemplate.class);
   private final String bankInn = "7725038124";
+  private SparkRepositoryDb sparkRepositoryDb;
+  private SparkService sparkService;
 
   @BeforeEach
   void setUp() {
@@ -73,25 +84,27 @@ class SparkServiceTest {
   @Test
   @DisplayName("findAll should return dtos")
   void findAllShouldReturnDto() {
-  // given
+    // given
     Mockito.when(sparkRepositoryDb.findAll())
         .thenReturn(List.of(test7tec,
             bank)
-            );
-  // when
-  var result = sparkService.findAll();
-  // then
-    Assertions.assertEquals(2, result.spliterator().getExactSizeIfKnown());
-  var companyDto = result.iterator().next();
-    Assertions.assertEquals("9705113553", companyDto.getInn());
-    Assertions.assertEquals("772501001", companyDto.getKpp());
-    Assertions.assertEquals("5177746290288", companyDto.getOgrn());
-    Assertions.assertEquals("ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \"СЕВЕНТЕК\"", companyDto.getFullNameRus());
-    Assertions.assertEquals("ООО \"7ТЕК\"", companyDto.getShortNameRus());
-    Assertions.assertEquals("Actual", companyDto.getStatusName());
-    Assertions.assertEquals(LocalDate
-        .of(2021, 1, 30), companyDto.getStatusDate());
-}
+        );
+    // when
+    var result = sparkService.findAll();
+    // then
+    var companyDto = result.iterator().next();
+    assertAll(
+        () -> assertEquals(2, result.spliterator().getExactSizeIfKnown()),
+        () -> assertEquals("9705113553", companyDto.getInn()),
+        () -> assertEquals("772501001", companyDto.getKpp()),
+        () -> assertEquals("5177746290288", companyDto.getOgrn()),
+        () -> assertEquals("ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \"СЕВЕНТЕК\"", companyDto.getFullNameRus()),
+        () -> assertEquals("ООО \"7ТЕК\"", companyDto.getShortNameRus()),
+        () -> assertEquals("Actual", companyDto.getStatusName()),
+        () -> assertEquals(LocalDate
+            .of(2021, 1, 30), companyDto.getStatusDate())
+    );
+  }
 
   @Test
   @DisplayName("findByInn should call RepositoryDb.findByInn")
@@ -114,14 +127,16 @@ class SparkServiceTest {
     //when
     var result = sparkService.findByInn(inn).orElse(bankDto);
     // then
-    Assertions.assertEquals("9705113553", result.getInn());
-    Assertions.assertEquals("772501001", result.getKpp());
-    Assertions.assertEquals("5177746290288", result.getOgrn());
-    Assertions.assertEquals("ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \"СЕВЕНТЕК\"", result.getFullNameRus());
-    Assertions.assertEquals("ООО \"7ТЕК\"", result.getShortNameRus());
-    Assertions.assertEquals("Actual", result.getStatusName());
-    Assertions.assertEquals(LocalDate
-        .of(2021, 1, 30), result.getStatusDate());
+    assertAll(
+        () -> assertEquals("9705113553", result.getInn()),
+        () -> assertEquals("772501001", result.getKpp()),
+        () -> assertEquals("5177746290288", result.getOgrn()),
+        () -> assertEquals("ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \"СЕВЕНТЕК\"", result.getFullNameRus()),
+        () -> assertEquals("ООО \"7ТЕК\"", result.getShortNameRus()),
+        () -> assertEquals("Actual", result.getStatusName()),
+        () -> assertEquals(LocalDate
+            .of(2021, 1, 30), result.getStatusDate())
+    );
   }
 
   @Test
@@ -133,12 +148,14 @@ class SparkServiceTest {
         );
     Mockito.when(aggregateTemplate.update(any())).then(returnsFirstArg());
     //when
-    var result = sparkService.update("7725038124",bankDto);
+    var result = sparkService.update(bankFromDb, bankDto);
     //then
     Mockito.verify(aggregateTemplate).update(ArgumentMatchers.any(Company.class));
-    Assertions.assertNotNull(result);
-    Assertions.assertSame(bank.getFullNameRus(),result.getFullNameRus());
-    Assertions.assertNotEquals(bank.getInn(),result.getInn());
+    assertAll(
+        ()->assertNotNull(result),
+        ()->assertSame(bank.getFullNameRus(), result.getFullNameRus()),
+        ()->assertNotEquals(bank.getInn(), result.getInn())
+  );
   }
 
   @Test
@@ -149,29 +166,23 @@ class SparkServiceTest {
     //when
     var result = sparkService.save(bankDto);
     //then
-    Assertions.assertNotNull(result);
-    Assertions.assertEquals(result.getInn(),"07725038124");
-    Assertions.assertNotEquals(result.getInn(),"7725038124");
+    assertAll(
+        ()->assertNotNull(result),
+        ()->assertEquals(result.getInn(), "07725038124"),
+        ()->assertNotEquals(result.getInn(), "7725038124")
+    );
   }
 
   @Test
   @DisplayName("delete should delete entities from the DB")
-  void deleteShouldDeleteEntities(){
+  void deleteShouldDeleteEntities() {
     //given
     Mockito.when(sparkRepositoryDb.findByInn("7725038124"))
         .thenReturn(java.util.Optional.of(bank)
         );
     //when
-    sparkService.delete("7725038124");
+    sparkService.delete(BigInteger.valueOf(1));
     //then
     Mockito.verify(sparkRepositoryDb).deleteById(BigInteger.valueOf(1));
-  }
-  @Test
-  @DisplayName("delete should throw exception if doesn't exist")
-  void deleteShouldThrowException() {
-    //given
-    Mockito.when(sparkRepositoryDb.findByInn("7725038124")).thenReturn(Optional.empty());
-    //when
-    Assertions.assertThrows(IllegalArgumentException.class, () -> sparkService.delete("7725038124"));
   }
 }
