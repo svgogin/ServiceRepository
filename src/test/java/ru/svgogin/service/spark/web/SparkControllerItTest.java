@@ -1,5 +1,6 @@
 package ru.svgogin.service.spark.web;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -51,9 +52,6 @@ public class SparkControllerItTest {
       "ООО \"7ТЕК\"",
       "Actual",
       LocalDate.of(2021, 1, 30));
-
-  //@Captor
-  //ArgumentCaptor<CompanyDto> companyDtoArgumentCaptor;
 
   @Test
   void getCompaniesShouldReturnAllCompanies() throws Exception {
@@ -142,7 +140,8 @@ public class SparkControllerItTest {
         );
 
     // then
-    var result = sparkRepositoryDb.findByInn("07725038124").orElse(test7tec); //What is better to throw if company was not found?
+    var result = sparkRepositoryDb.findByInn("07725038124").orElseThrow(() -> new IllegalArgumentException(
+        "There is no company with inn \"07725038124\""));
     var rowNum = sparkRepositoryDb.findAll().spliterator().getExactSizeIfKnown();
 
     assertAll(
@@ -219,8 +218,8 @@ public class SparkControllerItTest {
         .andDo(print())
         .andExpect(MockMvcResultMatchers.status().isOk());
     //then
-    var allRows = sparkRepositoryDb.findAll().spliterator().getExactSizeIfKnown();
-    assertEquals(0,allRows);
+    var allRows = sparkRepositoryDb.findAll();
+    assertThat(allRows).isEmpty();
   }
 
   @Test

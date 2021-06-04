@@ -49,7 +49,6 @@ public class SparkRepositoryTest {
     var result = sparkRepositoryDb.save(bank);
     //then
     assertAll(
-        () -> assertEquals(BigInteger.valueOf(1), result.getId()),
         () -> assertEquals("07725038124", result.getInn()),
         () -> assertEquals("0770401001", result.getKpp()),
         () -> assertEquals("01037739527077", result.getOgrn()),
@@ -77,8 +76,9 @@ public class SparkRepositoryTest {
         LocalDate.of(2020, 11, 30));
     //when
     var update = sparkRepositoryDb.save(bankUpd); //works as update, because bankUpd has the same id result
-    var allRows = sparkRepositoryDb.findAll();
     //then
+    var allRows = sparkRepositoryDb.findAll();
+
     assertAll(
         () -> assertEquals(1, allRows.spliterator().getExactSizeIfKnown()),
         () -> assertEquals(result.getId(), update.getId()),
@@ -92,16 +92,17 @@ public class SparkRepositoryTest {
             .of(2020, 11, 30), update.getStatusDate())
     );
   }
+
   @Test
   void shouldReturnNotExistsAfterDelete () {
     //given
-    var add = sparkRepositoryDb.save(bank);
+    var savedBank = sparkRepositoryDb.save(bank);
     //when
-    sparkRepositoryDb.deleteById(add.getId());
+    sparkRepositoryDb.deleteById(savedBank.getId());
+    //then
     boolean exists = sparkRepositoryDb.existsByInn("07725038124");
     var allRows = sparkRepositoryDb.findAll();
-    //then
     assertThat(exists).isFalse();
-    assertEquals(0, allRows.spliterator().getExactSizeIfKnown());
+    assertThat(allRows).isEmpty();
   }
 }
