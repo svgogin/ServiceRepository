@@ -142,10 +142,9 @@ public class SparkControllerItTest {
     // then
     var result = sparkRepositoryDb.findByInn("07725038124").orElseThrow(() -> new IllegalArgumentException(
         "There is no company with inn \"07725038124\""));
-    var rowNum = sparkRepositoryDb.findAll().spliterator().getExactSizeIfKnown();
 
     assertAll(
-        () -> assertEquals(1,rowNum),
+        () -> assertThat(sparkRepositoryDb.findAll()).hasSize(1),
         () -> assertEquals("07725038124", result.getInn()),
         () -> assertEquals("0770401001", result.getKpp()),
         () -> assertEquals("01037739527077", result.getOgrn()),
@@ -187,8 +186,7 @@ public class SparkControllerItTest {
             )
         );
     // then
-    var rowNumber = aggregateTemplate.findAll(Company.class).spliterator().getExactSizeIfKnown();
-    assertEquals(1, rowNumber);
+    assertThat(sparkRepositoryDb.findAll()).hasSize(1);
   }
 
   @Test

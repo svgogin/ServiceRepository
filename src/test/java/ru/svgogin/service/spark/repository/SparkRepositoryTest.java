@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.math.BigInteger;
 import java.time.LocalDate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -77,10 +76,9 @@ public class SparkRepositoryTest {
     //when
     var update = sparkRepositoryDb.save(bankUpd); //works as update, because bankUpd has the same id result
     //then
-    var allRows = sparkRepositoryDb.findAll();
 
     assertAll(
-        () -> assertEquals(1, allRows.spliterator().getExactSizeIfKnown()),
+        () -> assertThat(sparkRepositoryDb.findAll()).hasSize(1),
         () -> assertEquals(result.getId(), update.getId()),
         () -> assertEquals("7777711111", update.getInn()),
         () -> assertEquals("0770401001", update.getKpp()),
