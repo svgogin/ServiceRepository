@@ -43,15 +43,8 @@ public class SparkService {
   }
 
   public CompanyDto save(CompanyDto companyDto) {
-    Company company = toEntity(companyDto);
-    if (sparkRepositoryDb.existsByInn(company.getInn())) {
-      throw new IllegalArgumentException("Company with Inn = "
-                                         + company.getInn()
-                                         + " already exists");
-    } else {
-      return toDto(aggregateTemplate.insert(company));
+      return toDto(aggregateTemplate.insert(toEntity(companyDto)));
     }
-  }
 
   public void delete(BigInteger id) {
     sparkRepositoryDb.deleteById(id);
