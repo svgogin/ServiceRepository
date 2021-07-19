@@ -15,14 +15,6 @@ import ru.svgogin.service.spark.entity.Company;
 @DataJdbcTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class SparkRepositoryTest {
-  @Autowired
-  private SparkRepositoryDb sparkRepositoryDb;
-
-  @AfterEach
-  void tearDown() {
-    sparkRepositoryDb.deleteAll();
-  }
-
   private final Company bank = new Company(
       null,
       "07725038124",
@@ -32,6 +24,13 @@ public class SparkRepositoryTest {
       "АО\"БАНК ДОМ.РФ\"",
       "Действующая",
       LocalDate.of(2020, 11, 30));
+  @Autowired
+  private SparkRepositoryDb sparkRepositoryDb;
+
+  @AfterEach
+  void tearDown() {
+    sparkRepositoryDb.deleteAll();
+  }
 
   @Test
   void shouldReturnNotExistsForEmptyDatabase() {
@@ -42,7 +41,7 @@ public class SparkRepositoryTest {
   }
 
   @Test
-  void shouldReturnEntityIfExists () {
+  void shouldReturnEntityIfExists() {
     //given
     // when
     var result = sparkRepositoryDb.save(bank);
@@ -60,7 +59,7 @@ public class SparkRepositoryTest {
   }
 
   @Test
-  void shouldUpdateEntityIfExists () {
+  void shouldUpdateEntityIfExists() {
     //given
     var result = sparkRepositoryDb.save(bank);
 
@@ -92,7 +91,7 @@ public class SparkRepositoryTest {
   }
 
   @Test
-  void shouldReturnNotExistsAfterDelete () {
+  void shouldReturnNotExistsAfterDelete() {
     //given
     var savedBank = sparkRepositoryDb.save(bank);
     //when

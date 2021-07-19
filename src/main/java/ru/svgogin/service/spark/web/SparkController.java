@@ -14,15 +14,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.svgogin.service.spark.dto.CompanyDto;
-import ru.svgogin.service.spark.exception.EntityAlreadyExistsException;
 import ru.svgogin.service.spark.service.SparkService;
 
 
 @RestController
 @RequestMapping("/spark/companies")
 public class SparkController {
-  private final SparkService sparkService;
   private static final Logger log = LoggerFactory.getLogger(SparkController.class);
+  private final SparkService sparkService;
 
   public SparkController(SparkService sparkService) {
     this.sparkService = sparkService;
@@ -30,11 +29,13 @@ public class SparkController {
 
   @GetMapping()
   public Iterable<CompanyDto> getCompanies() {
+    log.info("getCompanies");
     return sparkService.findAll();
   }
 
   @GetMapping("/{inn}")
   public ResponseEntity<CompanyDto> getCompanyByInn(@PathVariable("inn") String inn) {
+    log.info("getCompanyByInn " + inn);
     var company = sparkService.findByInn(inn);
     return company.map(ResponseEntity::ok).orElseGet(() ->
         new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -42,17 +43,14 @@ public class SparkController {
 
   @PostMapping()
   public ResponseEntity<CompanyDto> saveCompany(@RequestBody CompanyDto companyDto) {
-    var companyInDb = sparkService.findByInn(companyDto.getInn());
-    if (companyInDb.isEmpty()) {
-      return new ResponseEntity<>(sparkService.save(companyDto), HttpStatus.OK);
-    } else {
-      throw new EntityAlreadyExistsException("Company with inn " + companyDto.getInn() + " already exists");
-    }
+    log.info("saveCompany with inn " + companyDto.getInn());
+    return new ResponseEntity<>(sparkService.save(companyDto), HttpStatus.OK);
   }
 
   @PutMapping("/{inn}")
   public ResponseEntity<CompanyDto> updateCompany(@PathVariable("inn") String inn,
                                                   @RequestBody CompanyDto companyDto) {
+    log.info("updateCompany " + companyDto.getInn());
     var companyFromDb = sparkService.findByInn(inn);
     return companyFromDb.map(dto ->
         new ResponseEntity<>(sparkService.update(dto, companyDto), HttpStatus.OK))
@@ -61,6 +59,7 @@ public class SparkController {
 
   @DeleteMapping("/{inn}")
   public ResponseEntity<CompanyDto> deleteCompany(@PathVariable("inn") String inn) {
+    log.info("deleteCompany " + inn);
     var companyOptional = sparkService.findByInn(inn);
     if (companyOptional.isPresent()) {
       BigInteger id = companyOptional.get().getId();
