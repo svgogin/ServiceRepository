@@ -51,7 +51,7 @@ public class SparkService {
                + " was not saved. Post method used instead of Put");
       throw new EntityAlreadyExistsException("Company with inn "
                                              + companyDto.getInn()
-                                             + " already exists");
+                                             + " was not saved. Post method used instead of Put");
     }
     log.info("Company with inn " + companyDto.getInn() + " was successfully saved.");
     return toDto(aggregateTemplate.insert(toEntity(companyDto)));
