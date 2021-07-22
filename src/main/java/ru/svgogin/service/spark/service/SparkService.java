@@ -48,13 +48,14 @@ public class SparkService {
     if (companyInDb) {
       log.info("Company with inn "
                + companyDto.getInn()
-               + " was not saved. Post method used instead of Put");
+               + " already exists");
       throw new EntityAlreadyExistsException("Company with inn "
                                              + companyDto.getInn()
-                                             + " was not saved. Post method used instead of Put");
+                                             + " already exists");
     }
+    var savedCompany = aggregateTemplate.insert(toEntity(companyDto));
     log.info("Company with inn " + companyDto.getInn() + " was successfully saved.");
-    return toDto(aggregateTemplate.insert(toEntity(companyDto)));
+    return toDto(savedCompany);
   }
 
   public void delete(BigInteger id) {
