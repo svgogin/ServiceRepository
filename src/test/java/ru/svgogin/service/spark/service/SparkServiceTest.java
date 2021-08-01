@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 
@@ -19,6 +20,7 @@ import org.mockito.Mockito;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import ru.svgogin.service.spark.dto.CompanyDto;
 import ru.svgogin.service.spark.entity.Company;
+import ru.svgogin.service.spark.exception.EntityAlreadyExistsException;
 import ru.svgogin.service.spark.repository.SparkRepositoryDb;
 
 class SparkServiceTest {
@@ -152,10 +154,10 @@ class SparkServiceTest {
     //then
     Mockito.verify(aggregateTemplate).update(ArgumentMatchers.any(Company.class));
     assertAll(
-        ()->assertNotNull(result),
-        ()->assertSame(bank.getFullNameRus(), result.getFullNameRus()),
-        ()->assertNotEquals(bank.getInn(), result.getInn())
-  );
+        () -> assertNotNull(result),
+        () -> assertSame(bank.getFullNameRus(), result.getFullNameRus()),
+        () -> assertNotEquals(bank.getInn(), result.getInn())
+    );
   }
 
   @Test
@@ -167,10 +169,19 @@ class SparkServiceTest {
     var result = sparkService.save(bankDto);
     //then
     assertAll(
-        ()->assertNotNull(result),
-        ()->assertEquals(result.getInn(), "07725038124"),
-        ()->assertNotEquals(result.getInn(), "7725038124")
+        () -> assertNotNull(result),
+        () -> assertEquals(result.getInn(), "07725038124"),
+        () -> assertNotEquals(result.getInn(), "7725038124")
     );
+  }
+
+  @Test
+  @DisplayName("save should throw exception if company already exists")
+  void saveShouldThrowException() {
+    //given
+    Mockito.when(sparkRepositoryDb.existsByInn(bankDto.getInn())).thenReturn(true);
+    //when
+    assertThrows(EntityAlreadyExistsException.class, () -> sparkService.save(bankDto));
   }
 
   @Test

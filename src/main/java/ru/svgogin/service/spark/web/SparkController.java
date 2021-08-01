@@ -1,6 +1,8 @@
 package ru.svgogin.service.spark.web;
 
 import java.math.BigInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +20,7 @@ import ru.svgogin.service.spark.service.SparkService;
 @RestController
 @RequestMapping("/spark/companies")
 public class SparkController {
+  private static final Logger log = LoggerFactory.getLogger(SparkController.class);
   private final SparkService sparkService;
 
   public SparkController(SparkService sparkService) {
@@ -26,24 +29,28 @@ public class SparkController {
 
   @GetMapping()
   public Iterable<CompanyDto> getCompanies() {
+    log.info("getCompanies");
     return sparkService.findAll();
   }
 
   @GetMapping("/{inn}")
   public ResponseEntity<CompanyDto> getCompanyByInn(@PathVariable("inn") String inn) {
+    log.info("getCompanyByInn " + inn);
     var company = sparkService.findByInn(inn);
     return company.map(ResponseEntity::ok).orElseGet(() ->
         new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
   @PostMapping()
-  public CompanyDto saveCompany(@RequestBody CompanyDto companyDto) {
-    return sparkService.save(companyDto);
+  public ResponseEntity<CompanyDto> saveCompany(@RequestBody CompanyDto companyDto) {
+    log.info("saveCompany with inn " + companyDto.getInn());
+    return new ResponseEntity<>(sparkService.save(companyDto), HttpStatus.OK);
   }
 
   @PutMapping("/{inn}")
   public ResponseEntity<CompanyDto> updateCompany(@PathVariable("inn") String inn,
                                                   @RequestBody CompanyDto companyDto) {
+    log.info("updateCompany " + companyDto.getInn());
     var companyFromDb = sparkService.findByInn(inn);
     return companyFromDb.map(dto ->
         new ResponseEntity<>(sparkService.update(dto, companyDto), HttpStatus.OK))
@@ -52,6 +59,7 @@ public class SparkController {
 
   @DeleteMapping("/{inn}")
   public ResponseEntity<CompanyDto> deleteCompany(@PathVariable("inn") String inn) {
+    log.info("deleteCompany " + inn);
     var companyOptional = sparkService.findByInn(inn);
     if (companyOptional.isPresent()) {
       BigInteger id = companyOptional.get().getId();

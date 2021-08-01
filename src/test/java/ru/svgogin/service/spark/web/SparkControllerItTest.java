@@ -21,6 +21,24 @@ import ru.svgogin.service.spark.repository.SparkRepositoryDb;
 @SpringBootTest
 @AutoConfigureMockMvc
 public class SparkControllerItTest {
+  private final Company bank = new Company(
+      null,
+      "07725038124",
+      "01037739527077",
+      "0770401001",
+      "АКЦИОНЕРНОЕ ОБЩЕСТВО \"БАНК ДОМ.РФ\"",
+      "АО\"БАНК ДОМ.РФ\"",
+      "Действующая",
+      LocalDate.of(2020, 11, 30));
+  private final Company test7tec = new Company(
+      null,
+      "9705113553",
+      "5177746290288",
+      "772501001",
+      "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \"СЕВЕНТЕК\"",
+      "ООО \"7ТЕК\"",
+      "Actual",
+      LocalDate.of(2021, 1, 30));
   @Autowired
   private MockMvc mockMvc;
   @Autowired
@@ -32,26 +50,6 @@ public class SparkControllerItTest {
   void tearDown() {
     aggregateTemplate.deleteAll(Company.class);
   }
-
-  private final Company bank = new Company(
-      null,
-      "07725038124",
-      "01037739527077",
-      "0770401001",
-      "АКЦИОНЕРНОЕ ОБЩЕСТВО \"БАНК ДОМ.РФ\"",
-      "АО\"БАНК ДОМ.РФ\"",
-      "Действующая",
-      LocalDate.of(2020, 11, 30));
-
-  private final Company test7tec = new Company(
-      null,
-      "9705113553",
-      "5177746290288",
-      "772501001",
-      "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \"СЕВЕНТЕК\"",
-      "ООО \"7ТЕК\"",
-      "Actual",
-      LocalDate.of(2021, 1, 30));
 
   @Test
   void getCompaniesShouldReturnAllCompanies() throws Exception {
@@ -110,6 +108,7 @@ public class SparkControllerItTest {
             )
         );
   }
+
   @Test
   void saveCompanyShouldReturnCompanyWithCorrectArgs() throws Exception {
     // given
@@ -155,6 +154,7 @@ public class SparkControllerItTest {
             .of(2020, 11, 30), result.getStatusDate())
     );
   }
+
   @Test
   void updateCompanyShouldReturnUpdatedCompany() throws Exception {
     // given
@@ -227,5 +227,26 @@ public class SparkControllerItTest {
     mockMvc.perform(MockMvcRequestBuilders.delete("/spark/companies/97725038124"))
         .andDo(print())
         .andExpect(MockMvcResultMatchers.status().isNotFound());
+  }
+
+  @Test
+  void saveCompanyShouldThrowExceptionWhenExists() throws Exception {
+    // given
+    aggregateTemplate.insert(bank);
+    // when
+    mockMvc.perform(MockMvcRequestBuilders.post("/spark/companies/")
+        .content("{\n"
+                 + "    \"inn\": \"07725038124\",\n"
+                 + "    \"ogrn\": \"01037739527077\",\n"
+                 + "    \"kpp\": \"0770401001\",\n"
+                 + "    \"fullNameRus\": \"АКЦИОНЕРНОЕ ОБЩЕСТВО \\\"БАНК ДОМ.РФ\\\"\",\n"
+                 + "    \"shortNameRus\": \"АО\\\"БАНК ДОМ.РФ\\\"\",\n"
+                 + "    \"statusName\": \"Действующая\",\n"
+                 + "    \"statusDate\": \"2020-11-30\"\n"
+                 + "  }\n").contentType("application/json"))
+        .andDo(print())
+        .andExpect(MockMvcResultMatchers.status().isConflict())
+        .andExpect(MockMvcResultMatchers.status().reason("This company already exists")
+        );
   }
 }

@@ -12,6 +12,7 @@ import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.stereotype.Service;
 import ru.svgogin.service.spark.dto.CompanyDto;
 import ru.svgogin.service.spark.entity.Company;
+import ru.svgogin.service.spark.exception.EntityAlreadyExistsException;
 import ru.svgogin.service.spark.repository.SparkRepositoryDb;
 
 @Service
@@ -43,14 +44,18 @@ public class SparkService {
   }
 
   public CompanyDto save(CompanyDto companyDto) {
-    Company company = toEntity(companyDto);
-    if (sparkRepositoryDb.existsByInn(company.getInn())) {
-      throw new IllegalArgumentException("Company with Inn = "
-                                         + company.getInn()
-                                         + " already exists");
-    } else {
-      return toDto(aggregateTemplate.insert(company));
+    var companyInDb = sparkRepositoryDb.existsByInn(companyDto.getInn());
+    if (companyInDb) {
+      log.info("Company with inn "
+               + companyDto.getInn()
+               + " already exists");
+      throw new EntityAlreadyExistsException("Company with inn "
+                                             + companyDto.getInn()
+                                             + " already exists");
     }
+    var savedCompany = aggregateTemplate.insert(toEntity(companyDto));
+    log.info("Company with inn " + companyDto.getInn() + " was successfully saved.");
+    return toDto(savedCompany);
   }
 
   public void delete(BigInteger id) {
