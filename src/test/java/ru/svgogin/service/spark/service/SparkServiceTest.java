@@ -111,8 +111,13 @@ class SparkServiceTest {
   @Test
   @DisplayName("findByInn should call RepositoryDb.findByInn")
   void findByInnShouldCallRepository() {
+    // given
+    String inn = "9705113553";
+    Mockito.when(sparkRepositoryDb.findByInn(inn))
+        .thenReturn(java.util.Optional.of(test7tec)
+        );
     // when
-    sparkService.findByInn(ArgumentMatchers.anyString());
+    sparkService.findByInn("9705113553");
     // then
     Mockito.verify(sparkRepositoryDb).findByInn(ArgumentMatchers.anyString());
   }
@@ -127,7 +132,7 @@ class SparkServiceTest {
         .thenReturn(java.util.Optional.of(test7tec)
         );
     //when
-    var result = sparkService.findByInn(inn).orElse(bankDto);
+    var result = sparkService.findByInn(inn);
     // then
     assertAll(
         () -> assertEquals("9705113553", result.getInn()),
@@ -150,7 +155,7 @@ class SparkServiceTest {
         );
     Mockito.when(aggregateTemplate.update(any())).then(returnsFirstArg());
     //when
-    var result = sparkService.update(bankFromDb, bankDto);
+    var result = sparkService.update("7725038124", bankDto);
     //then
     Mockito.verify(aggregateTemplate).update(ArgumentMatchers.any(Company.class));
     assertAll(
@@ -192,8 +197,8 @@ class SparkServiceTest {
         .thenReturn(java.util.Optional.of(bank)
         );
     //when
-    sparkService.delete(BigInteger.valueOf(1));
+    sparkService.delete("7725038124");
     //then
-    Mockito.verify(sparkRepositoryDb).deleteById(BigInteger.valueOf(1));
+    Mockito.verify(sparkRepositoryDb).deleteById(bank.getId());
   }
 }
