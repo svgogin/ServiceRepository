@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -114,7 +115,7 @@ class SparkServiceTest {
     // given
     String inn = "9705113553";
     Mockito.when(sparkRepositoryDb.findByInn(inn))
-        .thenReturn(java.util.Optional.of(test7tec)
+        .thenReturn(Optional.of(test7tec)
         );
     // when
     sparkService.findByInn("9705113553");
@@ -129,7 +130,7 @@ class SparkServiceTest {
     // given
     String inn = "9705113553";
     Mockito.when(sparkRepositoryDb.findByInn(inn))
-        .thenReturn(java.util.Optional.of(test7tec)
+        .thenReturn(Optional.of(test7tec)
         );
     //when
     var result = sparkService.findByInn(inn);
@@ -151,7 +152,7 @@ class SparkServiceTest {
   void updateShouldCallRepository() {
     //given
     Mockito.when(sparkRepositoryDb.findByInn("7725038124"))
-        .thenReturn(java.util.Optional.of(bank)
+        .thenReturn(Optional.of(bank)
         );
     Mockito.when(aggregateTemplate.update(any())).then(returnsFirstArg());
     //when
@@ -194,7 +195,7 @@ class SparkServiceTest {
   void deleteShouldDeleteEntities() {
     //given
     Mockito.when(sparkRepositoryDb.findByInn("7725038124"))
-        .thenReturn(java.util.Optional.of(bank)
+        .thenReturn(Optional.of(bank)
         );
     //when
     sparkService.delete("7725038124");

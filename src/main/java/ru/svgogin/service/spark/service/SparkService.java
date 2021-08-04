@@ -35,29 +35,25 @@ public class SparkService {
   }
 
   public CompanyDto findByInn(String inn) {
-    var companyOptional = sparkRepositoryDb.findByInn(inn);
-    if (companyOptional.isPresent()) {
-      log.info("Company with inn "
-               + companyOptional.get().getInn()
-               + " was successfully returned.");
-      return toDto(companyOptional.get());
-    }
-    throw new NoSuchEntityException("Company with inn "
-                                    + inn
-                                    + " doesn't exist");
+    var companyDto = sparkRepositoryDb.findByInn(inn)
+        .map(this::toDto)
+        .orElseThrow(() -> new NoSuchEntityException("Company with inn " + inn + " doesn't exist"));
+    log.info("Company with inn "
+             + companyDto.getInn()
+             + " was successfully returned.");
+    return companyDto;
   }
 
   public CompanyDto update(String inn, CompanyDto companyDto) {
-    var companyOptional = sparkRepositoryDb.findByInn(inn).map(this::toDto);
-    if (companyOptional.isPresent()) {
-      Company companyForUpdate = actualize(companyOptional.get(), companyDto);
-      var updatedCompany = aggregateTemplate.update(companyForUpdate);
-      log.info("Company with inn " + inn + " was successfully updated.");
-      return toDto(updatedCompany);
-    }
-    throw new NoSuchEntityException("Company with inn "
-                                    + companyDto.getInn()
-                                    + " doesn't exist");
+    var companyDtoEx = sparkRepositoryDb.findByInn(inn)
+        .map(this::toDto)
+        .orElseThrow(() -> new NoSuchEntityException("Company with inn "
+                                                     + companyDto.getInn()
+                                                     + " doesn't exist"));
+    Company companyForUpdate = actualize(companyDtoEx, companyDto);
+    var updatedCompany = aggregateTemplate.update(companyForUpdate);
+    log.info("Company with inn " + inn + " was successfully updated.");
+    return toDto(updatedCompany);
   }
 
   public CompanyDto save(CompanyDto companyDto) {
@@ -73,15 +69,12 @@ public class SparkService {
   }
 
   public CompanyDto delete(String inn) {
-    var companyOptional = sparkRepositoryDb.findByInn(inn);
-    if (companyOptional.isPresent()) {
-      sparkRepositoryDb.deleteById(companyOptional.get().getId());
-      log.info("Company with inn " + companyOptional.get().getInn() + " was successfully deleted.");
-      return toDto(companyOptional.get());
-    }
-    throw new NoSuchEntityException("Company with inn "
-                                    + inn
-                                    + " doesn't exist");
+    var companyDto = sparkRepositoryDb.findByInn(inn)
+        .map(this::toDto)
+        .orElseThrow(() -> new NoSuchEntityException("Company with inn " + inn + " doesn't exist"));
+    sparkRepositoryDb.deleteById(companyDto.getId());
+    log.info("Company with inn " + companyDto.getInn() + " was successfully deleted.");
+    return companyDto;
   }
 
   private Company toEntity(CompanyDto companyDto) {
