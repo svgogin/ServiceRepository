@@ -46,8 +46,7 @@ public class SparkControllerTest {
   @Test
   void getCompaniesShouldReturnAllCompanies() throws Exception {
     // given
-    Mockito.when(sparkService.findAll())
-        .thenReturn(List.of(bankDto));
+    Mockito.when(sparkService.findAll()).thenReturn(List.of(bankDto));
     // when
     mockMvc.perform(MockMvcRequestBuilders.get("/spark/companies"))
         .andDo(print())
@@ -73,8 +72,7 @@ public class SparkControllerTest {
   @Test
   void getCompanyByInnShouldReturnCompany() throws Exception {
     // given
-    Mockito.when(sparkService.findByInn("07725038124"))
-        .thenReturn(bankDto);
+    Mockito.when(sparkService.findByInn("07725038124")).thenReturn(bankDto);
     // when
     mockMvc.perform(MockMvcRequestBuilders.get("/spark/companies/07725038124"))
         .andDo(print())

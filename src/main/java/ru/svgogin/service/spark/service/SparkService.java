@@ -38,9 +38,7 @@ public class SparkService {
     var companyDto = sparkRepositoryDb.findByInn(inn)
         .map(this::toDto)
         .orElseThrow(() -> new NoSuchEntityException("Company with inn " + inn + " doesn't exist"));
-    log.info("Company with inn "
-             + companyDto.getInn()
-             + " was successfully returned.");
+    log.info("Company with inn " + companyDto.getInn() + " was successfully returned.");
     return companyDto;
   }
 
