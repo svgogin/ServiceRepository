@@ -246,7 +246,11 @@ public class SparkControllerItTest {
                  + "  }\n").contentType("application/json"))
         .andDo(print())
         .andExpect(MockMvcResultMatchers.status().isConflict())
-        .andExpect(MockMvcResultMatchers.status().reason("This company already exists")
-        );
+        .andExpect(MockMvcResultMatchers.content().json(
+                "{\n"
+                + "    \"code\": \"ERROR001\",\n"
+                + "    \"message\": \"Company with inn 07725038124 already exists\"\n"
+                + "}\n"
+        ));
   }
 }

@@ -1,6 +1,5 @@
 package ru.svgogin.service.spark.web;
 
-import java.math.BigInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -36,9 +35,7 @@ public class SparkController {
   @GetMapping("/{inn}")
   public ResponseEntity<CompanyDto> getCompanyByInn(@PathVariable("inn") String inn) {
     log.info("getCompanyByInn " + inn);
-    var company = sparkService.findByInn(inn);
-    return company.map(ResponseEntity::ok).orElseGet(() ->
-        new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    return new ResponseEntity<>(sparkService.findByInn(inn), HttpStatus.OK);
   }
 
   @PostMapping()
@@ -51,22 +48,12 @@ public class SparkController {
   public ResponseEntity<CompanyDto> updateCompany(@PathVariable("inn") String inn,
                                                   @RequestBody CompanyDto companyDto) {
     log.info("updateCompany " + companyDto.getInn());
-    var companyFromDb = sparkService.findByInn(inn);
-    return companyFromDb.map(dto ->
-        new ResponseEntity<>(sparkService.update(dto, companyDto), HttpStatus.OK))
-        .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    return new ResponseEntity<>(sparkService.update(inn, companyDto), HttpStatus.OK);
   }
 
   @DeleteMapping("/{inn}")
   public ResponseEntity<CompanyDto> deleteCompany(@PathVariable("inn") String inn) {
     log.info("deleteCompany " + inn);
-    var companyOptional = sparkService.findByInn(inn);
-    if (companyOptional.isPresent()) {
-      BigInteger id = companyOptional.get().getId();
-      sparkService.delete(id);
-      return new ResponseEntity<>(companyOptional.get(), HttpStatus.OK);
-    } else {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
+    return new ResponseEntity<>(sparkService.delete(inn), HttpStatus.OK);
   }
 }

@@ -2,8 +2,6 @@ package ru.svgogin.service.spark.service;
 
 import static java.util.Objects.requireNonNullElse;
 
-import java.math.BigInteger;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
@@ -13,6 +11,7 @@ import org.springframework.stereotype.Service;
 import ru.svgogin.service.spark.dto.CompanyDto;
 import ru.svgogin.service.spark.entity.Company;
 import ru.svgogin.service.spark.exception.EntityAlreadyExistsException;
+import ru.svgogin.service.spark.exception.NoSuchEntityException;
 import ru.svgogin.service.spark.repository.SparkRepositoryDb;
 
 @Service
@@ -29,26 +28,35 @@ public class SparkService {
 
   public Iterable<CompanyDto> findAll() {
     Iterable<Company> companies = sparkRepositoryDb.findAll();
+    log.info("All companies were successfully returned.");
     return StreamSupport.stream(companies.spliterator(), false)
         .map(this::toDto)
         .collect(Collectors.toList());
   }
 
-  public Optional<CompanyDto> findByInn(String inn) {
-    return sparkRepositoryDb.findByInn(inn).map(this::toDto);
+  public CompanyDto findByInn(String inn) {
+    var companyDto = sparkRepositoryDb.findByInn(inn)
+        .map(this::toDto)
+        .orElseThrow(() -> new NoSuchEntityException("Company with inn " + inn + " doesn't exist"));
+    log.info("Company with inn " + companyDto.getInn() + " was successfully returned.");
+    return companyDto;
   }
 
-  public CompanyDto update(CompanyDto companyFromDb, CompanyDto companyDto) {
-    Company companyForUpdate = actualize(companyFromDb, companyDto);
-    return toDto(aggregateTemplate.update(companyForUpdate));
+  public CompanyDto update(String inn, CompanyDto companyDto) {
+    var companyDtoEx = sparkRepositoryDb.findByInn(inn)
+        .map(this::toDto)
+        .orElseThrow(() -> new NoSuchEntityException("Company with inn "
+                                                     + companyDto.getInn()
+                                                     + " doesn't exist"));
+    Company companyForUpdate = actualize(companyDtoEx, companyDto);
+    var updatedCompany = aggregateTemplate.update(companyForUpdate);
+    log.info("Company with inn " + inn + " was successfully updated.");
+    return toDto(updatedCompany);
   }
 
   public CompanyDto save(CompanyDto companyDto) {
     var companyInDb = sparkRepositoryDb.existsByInn(companyDto.getInn());
     if (companyInDb) {
-      log.info("Company with inn "
-               + companyDto.getInn()
-               + " already exists");
       throw new EntityAlreadyExistsException("Company with inn "
                                              + companyDto.getInn()
                                              + " already exists");
@@ -58,8 +66,13 @@ public class SparkService {
     return toDto(savedCompany);
   }
 
-  public void delete(BigInteger id) {
-    sparkRepositoryDb.deleteById(id);
+  public CompanyDto delete(String inn) {
+    var companyDto = sparkRepositoryDb.findByInn(inn)
+        .map(this::toDto)
+        .orElseThrow(() -> new NoSuchEntityException("Company with inn " + inn + " doesn't exist"));
+    sparkRepositoryDb.deleteById(companyDto.getId());
+    log.info("Company with inn " + companyDto.getInn() + " was successfully deleted.");
+    return companyDto;
   }
 
   private Company toEntity(CompanyDto companyDto) {
