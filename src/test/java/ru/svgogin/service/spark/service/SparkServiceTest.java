@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -17,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import ru.svgogin.service.spark.dto.CompanyDto;
 import ru.svgogin.service.spark.entity.Company;
@@ -62,7 +64,7 @@ class SparkServiceTest {
       "АО\"БАНК ДОМ.РФ\"",
       "Действующая",
       LocalDate.of(2020, 11, 30));
-  private final JdbcAggregateTemplate aggregateTemplate = Mockito.mock(JdbcAggregateTemplate.class);
+  private final JdbcAggregateTemplate aggregateTemplate = mock(JdbcAggregateTemplate.class);
   private final String bankInn = "7725038124";
   private SparkRepositoryDb sparkRepositoryDb;
   private SparkService sparkService;
@@ -70,7 +72,7 @@ class SparkServiceTest {
   @BeforeEach
   void setUp() {
     System.out.println("set up");
-    sparkRepositoryDb = Mockito.mock(SparkRepositoryDb.class);
+    sparkRepositoryDb = mock(SparkRepositoryDb.class);
 
     sparkService = new SparkService(sparkRepositoryDb, aggregateTemplate);
   }
@@ -81,14 +83,14 @@ class SparkServiceTest {
     // when
     sparkService.findAll();
     // then
-    Mockito.verify(sparkRepositoryDb).findAll();
+    verify(sparkRepositoryDb).findAll();
   }
 
   @Test
   @DisplayName("findAll should return dtos")
   void findAllShouldReturnDto() {
     // given
-    Mockito.when(sparkRepositoryDb.findAll()).thenReturn(List.of(test7tec, bank));
+    when(sparkRepositoryDb.findAll()).thenReturn(List.of(test7tec, bank));
     // when
     var result = sparkService.findAll();
     // then
@@ -111,11 +113,11 @@ class SparkServiceTest {
   void findByInnShouldCallRepository() {
     // given
     String inn = "9705113553";
-    Mockito.when(sparkRepositoryDb.findByInn(inn)).thenReturn(Optional.of(test7tec));
+    when(sparkRepositoryDb.findByInn(inn)).thenReturn(Optional.of(test7tec));
     // when
     sparkService.findByInn("9705113553");
     // then
-    Mockito.verify(sparkRepositoryDb).findByInn(ArgumentMatchers.anyString());
+    verify(sparkRepositoryDb).findByInn(ArgumentMatchers.anyString());
   }
 
 
@@ -124,7 +126,7 @@ class SparkServiceTest {
   void findByInnShouldReturnObjectWithInn() {
     // given
     String inn = "9705113553";
-    Mockito.when(sparkRepositoryDb.findByInn(inn)).thenReturn(Optional.of(test7tec));
+    when(sparkRepositoryDb.findByInn(inn)).thenReturn(Optional.of(test7tec));
     //when
     var result = sparkService.findByInn(inn);
     // then
@@ -144,12 +146,12 @@ class SparkServiceTest {
   @DisplayName("update should call aggregateTemplate.update and update entities")
   void updateShouldCallRepository() {
     //given
-    Mockito.when(sparkRepositoryDb.findByInn("7725038124")).thenReturn(Optional.of(bank));
-    Mockito.when(aggregateTemplate.update(any())).then(returnsFirstArg());
+    when(sparkRepositoryDb.findByInn("7725038124")).thenReturn(Optional.of(bank));
+    when(aggregateTemplate.update(any())).then(returnsFirstArg());
     //when
     var result = sparkService.update("7725038124", bankDto);
     //then
-    Mockito.verify(aggregateTemplate).update(ArgumentMatchers.any(Company.class));
+    verify(aggregateTemplate).update(ArgumentMatchers.any(Company.class));
     assertAll(
         () -> assertNotNull(result),
         () -> assertSame(bank.getFullNameRus(), result.getFullNameRus()),
@@ -161,7 +163,7 @@ class SparkServiceTest {
   @DisplayName("save should insert entities to the DB")
   void save() {
     //given
-    Mockito.when(aggregateTemplate.insert(any())).then(returnsFirstArg());
+    when(aggregateTemplate.insert(any())).then(returnsFirstArg());
     //when
     var result = sparkService.save(bankDto);
     //then
@@ -176,7 +178,7 @@ class SparkServiceTest {
   @DisplayName("save should throw exception if company already exists")
   void saveShouldThrowException() {
     //given
-    Mockito.when(sparkRepositoryDb.existsByInn(bankDto.getInn())).thenReturn(true);
+    when(sparkRepositoryDb.existsByInn(bankDto.getInn())).thenReturn(true);
     //when
     assertThrows(EntityAlreadyExistsException.class, () -> sparkService.save(bankDto));
   }
@@ -185,10 +187,10 @@ class SparkServiceTest {
   @DisplayName("delete should delete entities from the DB")
   void deleteShouldDeleteEntities() {
     //given
-    Mockito.when(sparkRepositoryDb.findByInn("7725038124")).thenReturn(Optional.of(bank));
+    when(sparkRepositoryDb.findByInn("7725038124")).thenReturn(Optional.of(bank));
     //when
     sparkService.delete("7725038124");
     //then
-    Mockito.verify(sparkRepositoryDb).deleteById(bank.getId());
+    verify(sparkRepositoryDb).deleteById(bank.getId());
   }
 }

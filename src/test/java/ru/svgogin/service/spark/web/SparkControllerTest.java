@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import java.math.BigInteger;
@@ -13,7 +15,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -46,7 +47,7 @@ public class SparkControllerTest {
   @Test
   void getCompaniesShouldReturnAllCompanies() throws Exception {
     // given
-    Mockito.when(sparkService.findAll()).thenReturn(List.of(bankDto));
+    when(sparkService.findAll()).thenReturn(List.of(bankDto));
     // when
     mockMvc.perform(MockMvcRequestBuilders.get("/spark/companies"))
         .andDo(print())
@@ -66,13 +67,13 @@ public class SparkControllerTest {
         );
 
     // then
-    Mockito.verify(sparkService).findAll();
+    verify(sparkService).findAll();
   }
 
   @Test
   void getCompanyByInnShouldReturnCompany() throws Exception {
     // given
-    Mockito.when(sparkService.findByInn("07725038124")).thenReturn(bankDto);
+    when(sparkService.findByInn("07725038124")).thenReturn(bankDto);
     // when
     mockMvc.perform(MockMvcRequestBuilders.get("/spark/companies/07725038124"))
         .andDo(print())
@@ -91,13 +92,13 @@ public class SparkControllerTest {
         );
 
     // then
-    Mockito.verify(sparkService).findByInn("07725038124");
+    verify(sparkService).findByInn("07725038124");
   }
 
   @Test
   void saveCompanyShouldReturnCompanyWithCorrectArgs() throws Exception {
     // given
-    Mockito.when(sparkService.save(any())).then(returnsFirstArg());
+    when(sparkService.save(any())).then(returnsFirstArg());
     // when
     mockMvc.perform(MockMvcRequestBuilders.post("/spark/companies/")
         .content("{\n"
@@ -125,7 +126,7 @@ public class SparkControllerTest {
         );
 
     // then
-    Mockito.verify(sparkService).save(companyDtoArgumentCaptor.capture());
+    verify(sparkService).save(companyDtoArgumentCaptor.capture());
     CompanyDto result = companyDtoArgumentCaptor.getValue();
     assertAll(
         () -> assertEquals("07725038124", result.getInn()),
@@ -142,7 +143,7 @@ public class SparkControllerTest {
   @Test
   void updateCompanyShouldReturnCompanyWithCorrectArgs() throws Exception {
     // given
-    Mockito.when(sparkService.update(any(),any())).thenReturn(bankDto);
+    when(sparkService.update(any(),any())).thenReturn(bankDto);
     // when
     mockMvc.perform(MockMvcRequestBuilders.put("/spark/companies/07725038124")
         .content("{\n"
@@ -159,7 +160,7 @@ public class SparkControllerTest {
         .andExpect(MockMvcResultMatchers.status().isOk());
 
     // then
-    Mockito.verify(sparkService).update(any(),companyDtoArgumentCaptor.capture());
+    verify(sparkService).update(any(),companyDtoArgumentCaptor.capture());
     CompanyDto result = companyDtoArgumentCaptor.getValue();
     assertAll(
         () -> assertEquals("77777777", result.getInn()),
@@ -176,7 +177,7 @@ public class SparkControllerTest {
   @Test
   void updateShouldReturn404IfNoCompanyForUpdate() throws Exception {
     //given
-    Mockito.when(sparkService.update(any(), any())).thenThrow(NoSuchEntityException.class);
+    when(sparkService.update(any(), any())).thenThrow(NoSuchEntityException.class);
     // when
     mockMvc.perform(MockMvcRequestBuilders.put("/spark/companies/07725038124")
         .content("{\n"
@@ -195,19 +196,19 @@ public class SparkControllerTest {
   @Test
   void deleteCompanyShouldDeleteEntities() throws Exception {
     // given
-    Mockito.when(sparkService.delete(any())).thenReturn(bankDto);
+    when(sparkService.delete(any())).thenReturn(bankDto);
     //when
     mockMvc.perform(MockMvcRequestBuilders.delete("/spark/companies/07725038124"))
         .andDo(print())
         .andExpect(MockMvcResultMatchers.status().isOk());
     //then
-    Mockito.verify(sparkService).delete(argThat(inn -> inn.equals("07725038124")));
+    verify(sparkService).delete(argThat(inn -> inn.equals("07725038124")));
   }
 
   @Test
   void deleteCompanyShouldReturn404ifNotExist() throws Exception {
     // given
-    Mockito.when(sparkService.delete(any())).thenThrow(NoSuchEntityException.class);
+    when(sparkService.delete(any())).thenThrow(NoSuchEntityException.class);
     //when
     mockMvc.perform(MockMvcRequestBuilders.delete("/spark/companies/97725038124"))
         .andDo(print())
