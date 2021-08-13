@@ -39,7 +39,6 @@ public class SparkController {
   public ResponseEntity<CompanyDto> getCompanyByInn(@PathVariable("inn")
                                                       @Pattern(regexp = "^(\\d{10}|\\d{12})$", message =
                                                           "Inn should contain 10 or 12 digits") String inn) {
-    //toDo Here I've got different response formats, but I want to have only one
     log.info("getCompanyByInn " + inn);
     return new ResponseEntity<>(sparkService.findByInn(inn), HttpStatus.OK);
   }

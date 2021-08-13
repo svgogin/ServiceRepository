@@ -14,6 +14,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import ru.svgogin.service.spark.errordto.ErrorDto;
 import ru.svgogin.service.spark.exception.EntityAlreadyExistsException;
 import ru.svgogin.service.spark.exception.NoSuchEntityException;
+import javax.validation.ConstraintViolationException;
 
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
@@ -36,6 +37,15 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     var bodyOfResponse = new ErrorDto(ErrorDto.ErrorCode.ERROR002, message);
     return handleExceptionInternal(ex, bodyOfResponse,
         new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @ExceptionHandler(value = {ConstraintViolationException.class })
+  protected ResponseEntity<Object> handleNotValid(RuntimeException ex, WebRequest request) {
+    String message = ex.getMessage();
+    var bodyOfResponse = new ErrorDto(ErrorDto.ErrorCode.ERROR003, message);
+    log.warn(message);
+    return handleExceptionInternal(ex, bodyOfResponse,
+        new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
   }
 
   @NonNull
