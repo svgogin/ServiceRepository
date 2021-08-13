@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -34,5 +36,24 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     var bodyOfResponse = new ErrorDto(ErrorDto.ErrorCode.ERROR002, message);
     return handleExceptionInternal(ex, bodyOfResponse,
         new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @NonNull
+  @Override
+  protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+                                                                @NonNull HttpHeaders headers,
+                                                                @NonNull HttpStatus status,
+                                                                @NonNull WebRequest request) {
+    var errorField = ex.getBindingResult().getFieldErrors().iterator().next().getField();
+    var message = "Invalid format of request parameter: " + errorField;
+    //toDO If a parameter is not passed in the request, I don't know,
+    // how to write a condition to change the message.
+    // In both cases handleMethodArgumentNotValid is invoked instead of
+    // handleMissingServletRequestParameter
+    // (when a parameter is missing)
+    var bodyOfResponse = new ErrorDto(ErrorDto.ErrorCode.ERROR003, message);
+    log.warn(message);
+    return handleExceptionInternal(ex, bodyOfResponse,
+        headers, status, request);
   }
 }
