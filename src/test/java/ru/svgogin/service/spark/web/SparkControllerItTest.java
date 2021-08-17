@@ -380,8 +380,7 @@ public class SparkControllerItTest {
     mockMvc.perform(MockMvcRequestBuilders.put("/spark/companies/7725038124")
         .content("{\n"
                  + "        \"inn\": \"9705113553\",\n"
-                 + "        \"ogrn\": \"51777462902880"
-                 + "\",\n"
+                 + "        \"ogrn\": \"51777462902880\",\n"
                  + "        \"kpp\": \"772501001\",\n"
                  + "        \"fullNameRus\": \"ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \\\"СЕВЕНТЕК\\\"\",\n"
                  + "        \"shortNameRus\": \"ООО \\\"7ТЕК\\\"\",\n"
