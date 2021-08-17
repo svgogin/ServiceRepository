@@ -7,10 +7,10 @@ import javax.validation.constraints.Pattern;
 
 public class CompanyDto {
   private final BigInteger id;
-  @NotBlank(message = "Inn is mandatory")
+  @NotBlank
   @Pattern(regexp = "^(\\d{10}|\\d{12})$")
   private final String inn;
-  @NotBlank(message = "Ogrn is mandatory")
+  @NotBlank
   @Pattern(regexp = "^(\\d{13}|\\d{15})$")
   private final String ogrn;
   @Pattern(regexp = "^(\\d{9})$")

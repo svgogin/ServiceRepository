@@ -1,5 +1,9 @@
 package ru.svgogin.service.spark.handler;
 
+import static java.util.Arrays.asList;
+
+import java.util.Objects;
+import javax.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -14,7 +18,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import ru.svgogin.service.spark.errordto.ErrorDto;
 import ru.svgogin.service.spark.exception.EntityAlreadyExistsException;
 import ru.svgogin.service.spark.exception.NoSuchEntityException;
-import javax.validation.ConstraintViolationException;
 
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
@@ -39,7 +42,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         new HttpHeaders(), HttpStatus.NOT_FOUND, request);
   }
 
-  @ExceptionHandler(value = {ConstraintViolationException.class })
+  @ExceptionHandler(value = {ConstraintViolationException.class})
   protected ResponseEntity<Object> handleNotValid(RuntimeException ex, WebRequest request) {
     String message = ex.getMessage();
     var bodyOfResponse = new ErrorDto(ErrorDto.ErrorCode.ERROR003, message);
@@ -54,13 +57,18 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                                                                 @NonNull HttpHeaders headers,
                                                                 @NonNull HttpStatus status,
                                                                 @NonNull WebRequest request) {
-    var errorField = ex.getBindingResult().getFieldErrors().iterator().next().getField();
+    var error = ex.getBindingResult().getFieldErrors().iterator().next();
+    var errorField = error.getField();
+    //This is a bullshit implementation, but I have no idea, how to improve it
+    var notBlankExists = asList(Objects.requireNonNull(error.getCodes())).contains("NotBlank");
+    if (notBlankExists) {
+      var message = "Request parameter is required: " + errorField;
+      var bodyOfResponse = new ErrorDto(ErrorDto.ErrorCode.ERROR004, message);
+      log.warn(message);
+      return handleExceptionInternal(ex, bodyOfResponse,
+          headers, status, request);
+    }
     var message = "Invalid format of request parameter: " + errorField;
-    //toDO If a parameter is not passed in the request, I don't know,
-    // how to write a condition to change the message.
-    // In both cases handleMethodArgumentNotValid is invoked instead of
-    // handleMissingServletRequestParameter
-    // (when a parameter is missing)
     var bodyOfResponse = new ErrorDto(ErrorDto.ErrorCode.ERROR003, message);
     log.warn(message);
     return handleExceptionInternal(ex, bodyOfResponse,

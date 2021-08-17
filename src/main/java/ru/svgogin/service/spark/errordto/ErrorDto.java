@@ -19,8 +19,16 @@ public final class ErrorDto {
   }
 
   public enum ErrorCode {
-    ERROR001,
-    ERROR002,
-    ERROR003
+    ERROR001("EntityAlreadyExists"),
+    ERROR002("NoSuchEntity"),
+    ERROR003("ValidationFailed"),
+    ERROR004("MissingParameter");
+
+    public final String label;
+
+    ErrorCode(String label) {
+      this.label = label;
+    }
   }
 }
+
