@@ -36,11 +36,10 @@ public class SparkController {
   }
 
   @GetMapping("/{inn}")
-  public ResponseEntity<CompanyDto> getCompanyByInn(@PathVariable("inn")
-                                                      @Pattern(regexp = "^(\\d{10}|\\d{12})$",
-                                                               message = "Inn should contain "
-                                                                         + "10 or 12 digits")
-                                                          String inn) {
+  public ResponseEntity<CompanyDto> getCompanyByInn(
+      @PathVariable("inn")
+      @Pattern(regexp = "^(\\d{10}|\\d{12})$",
+               message = "Inn should contain 10 or 12 digits") String inn) {
     log.info("getCompanyByInn " + inn);
     return new ResponseEntity<>(sparkService.findByInn(inn), HttpStatus.OK);
   }
@@ -52,20 +51,20 @@ public class SparkController {
   }
 
   @PutMapping("/{inn}")
-  public ResponseEntity<CompanyDto> updateCompany(@PathVariable("inn")
-                                                    @Pattern(regexp = "^(\\d{10}|\\d{12})$",
-                                                             message = "Inn should contain "
-                                                        + "10 or 12 digits") String inn,
-                                                  @Valid @RequestBody CompanyDto companyDto) {
+  public ResponseEntity<CompanyDto> updateCompany(
+      @PathVariable("inn")
+      @Pattern(regexp = "^(\\d{10}|\\d{12})$",
+               message = "Inn should contain 10 or 12 digits") String inn,
+      @Valid @RequestBody CompanyDto companyDto) {
     log.info("updateCompany " + companyDto.getInn());
     return new ResponseEntity<>(sparkService.update(inn, companyDto), HttpStatus.OK);
   }
 
   @DeleteMapping("/{inn}")
-  public ResponseEntity<CompanyDto> deleteCompany(@PathVariable("inn")
-                                                    @Pattern(regexp = "^(\\d{10}|\\d{12})$",
-                                                             message = "Inn should contain "
-                                                        + "10 or 12 digits") String inn) {
+  public ResponseEntity<CompanyDto> deleteCompany(
+      @PathVariable("inn")
+      @Pattern(regexp = "^(\\d{10}|\\d{12})$",
+               message = "Inn should contain 10 or 12 digits") String inn) {
     log.info("deleteCompany " + inn);
     return new ResponseEntity<>(sparkService.delete(inn), HttpStatus.OK);
   }
