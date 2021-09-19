@@ -217,7 +217,6 @@ public class SparkControllerTest {
 
   @Test
   void getCompanyByInnShouldThrowException_WhenPathInnIsNotValid() throws Exception {
-    // given
     // when
     mockMvc.perform(MockMvcRequestBuilders.get("/spark/companies/77725038124"))
         .andDo(print())
@@ -225,7 +224,7 @@ public class SparkControllerTest {
         .andExpect(MockMvcResultMatchers.content().json(
             "[{\n"
             + "    \"code\": \"ERROR003\",\n"
-            + "    \"message\": \"getCompanyByInn.inn: Inn should contain 10 or 12 digits\"\n"
+            + "    \"message\": \"Inn should contain 10 or 12 digits (77725038124)\"\n"
             + "}]\n"
             )
         );
@@ -233,7 +232,6 @@ public class SparkControllerTest {
 
   @Test
   void saveCompanyShouldThrowException_WhenOgrnInBodyIsNotValid() throws Exception {
-    // given
     // when
     mockMvc.perform(MockMvcRequestBuilders.post("/spark/companies/")
         .content("{\n"
@@ -258,7 +256,6 @@ public class SparkControllerTest {
 
   @Test
   void saveCompanyShouldThrowException_WhenInnInBodyIsNotValid() throws Exception {
-    // given
     // when
     mockMvc.perform(MockMvcRequestBuilders.post("/spark/companies/")
         .content("{\n"
@@ -283,7 +280,6 @@ public class SparkControllerTest {
 
   @Test
   void saveCompanyShouldThrowException_WhenKppInBodyIsNotValid() throws Exception {
-    // given
     // when
     mockMvc.perform(MockMvcRequestBuilders.post("/spark/companies/")
         .content("{\n"
@@ -308,7 +304,6 @@ public class SparkControllerTest {
 
   @Test
   void updateCompanyShouldThrowException_WhenPathInnIsNotValid() throws Exception {
-    // given
     // when
     mockMvc.perform(MockMvcRequestBuilders.put("/spark/companies/77250381242")
         .content("{\n"
@@ -326,7 +321,7 @@ public class SparkControllerTest {
         .andExpect(MockMvcResultMatchers.content().json(
             "[{\n"
             + "    \"code\": \"ERROR003\",\n"
-            + "    \"message\": \"updateCompany.inn: Inn should contain 10 or 12 digits\"\n"
+            + "    \"message\": \"Inn should contain 10 or 12 digits (77250381242)\"\n"
             + "}]\n"
             )
         );
@@ -334,7 +329,6 @@ public class SparkControllerTest {
 
   @Test
   void updateCompanyShouldThrowException_WhenBodyIsNotValid() throws Exception {
-    // given
     // when
     mockMvc.perform(MockMvcRequestBuilders.put("/spark/companies/7725038124")
         .content("{\n"
@@ -373,7 +367,7 @@ public class SparkControllerTest {
             "\n"
             + "[{\n"
             + "    \"code\": \"ERROR003\",\n"
-            + "    \"message\": \"deleteCompany.inn: Inn should contain 10 or 12 digits\"\n"
+            + "    \"message\": \"Inn should contain 10 or 12 digits (77725038120)\"\n"
             + "}]\n"
             )
         );
