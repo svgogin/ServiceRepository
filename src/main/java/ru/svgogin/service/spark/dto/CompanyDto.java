@@ -2,11 +2,18 @@ package ru.svgogin.service.spark.dto;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
 public class CompanyDto {
   private final BigInteger id;
+  @NotBlank
+  @Pattern(regexp = "^(\\d{10}|\\d{12})$")
   private final String inn;
+  @NotBlank
+  @Pattern(regexp = "^(\\d{13}|\\d{15})$")
   private final String ogrn;
+  @Pattern(regexp = "^(\\d{9})$")
   private final String kpp;
   private final String fullNameRus;
   private final String shortNameRus;
