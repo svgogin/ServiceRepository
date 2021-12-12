@@ -31,20 +31,16 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
   @ExceptionHandler(value = {EntityAlreadyExistsException.class})
   protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
-    var message = ex.getMessage();
-    var errorCode = ErrorCode.ERROR001;
-    var bodyOfResponse = List.of(new ErrorDto(errorCode, message));
-    log.warn(message);
+    var bodyOfResponse = List.of(new ErrorDto(ErrorCode.ERROR001, ex.getMessage()));
+    log.warn(ex.getMessage());
     return handleExceptionInternal(ex, bodyOfResponse,
         new HttpHeaders(), HttpStatus.CONFLICT, request);
   }
 
   @ExceptionHandler(value = {NoSuchEntityException.class})
   protected ResponseEntity<Object> handleNotFound(RuntimeException ex, WebRequest request) {
-    var message = ex.getMessage();
-    var errorCode = ErrorCode.ERROR002;
-    var bodyOfResponse = List.of(new ErrorDto(errorCode, message));
-    log.warn(message);
+    var bodyOfResponse = List.of(new ErrorDto(ErrorCode.ERROR002, ex.getMessage()));
+    log.warn(ex.getMessage());
     return handleExceptionInternal(ex, bodyOfResponse,
         new HttpHeaders(), HttpStatus.NOT_FOUND, request);
   }
@@ -87,10 +83,9 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
   }
 
   private ErrorDto toErrorDto(ConstraintViolation<?> violation) {
-    var errorCode = ErrorCode.ERROR003;
     var message = String.format("%s (%s)", violation.getMessageTemplate(),
         violation.getInvalidValue());
     log.warn(message);
-    return new ErrorDto(errorCode, message);
+    return new ErrorDto(ErrorCode.ERROR003, message);
   }
 }

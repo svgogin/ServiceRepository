@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 
-
 public class Company {
   @Id
   private final BigInteger id;

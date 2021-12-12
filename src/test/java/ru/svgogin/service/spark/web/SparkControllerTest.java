@@ -248,7 +248,7 @@ public class SparkControllerTest {
         .andExpect(MockMvcResultMatchers.content().json(
             "[{\n"
             + "    \"code\": \"ERROR003\",\n"
-            + "    \"message\": \"InvalidFormat (ogrn)\"\n"
+            + "    \"message\": \"InvalidRequestFormat (ogrn)\"\n"
             + "}]\n"
             )
         );
@@ -272,7 +272,7 @@ public class SparkControllerTest {
         .andExpect(MockMvcResultMatchers.content().json(
             "[{\n"
             + "    \"code\": \"ERROR003\",\n"
-            + "    \"message\": \"InvalidFormat (inn)\"\n"
+            + "    \"message\": \"InvalidRequestFormat (inn)\"\n"
             + "}]\n"
             )
         );
@@ -296,7 +296,30 @@ public class SparkControllerTest {
         .andExpect(MockMvcResultMatchers.content().json(
             "[{\n"
             + "    \"code\": \"ERROR003\",\n"
-            + "    \"message\": \"InvalidFormat (kpp)\"\n"
+            + "    \"message\": \"InvalidRequestFormat (kpp)\"\n"
+            + "}]\n"
+            )
+        );
+  }
+
+  @Test
+  void saveCompanyShouldThrowException_WhenOgrnInBodyIsMissing() throws Exception {
+    // when
+    mockMvc.perform(MockMvcRequestBuilders.post("/spark/companies/")
+        .content("{\n"
+                 + "    \"inn\": \"7725038120\",\n"
+                 + "    \"kpp\": \"772501001\",\n"
+                 + "    \"fullNameRus\": \"АКЦИОНЕРНОЕ ОБЩЕСТВО \\\"БАНК ДОМ.РФ\\\"\",\n"
+                 + "    \"shortNameRus\": \"АО\\\"БАНК ДОМ.РФ\\\"\",\n"
+                 + "    \"statusName\": \"Действующая\",\n"
+                 + "    \"statusDate\": \"2020-11-30\"\n"
+                 + "  }\n").contentType("application/json"))
+        .andDo(print())
+        .andExpect(MockMvcResultMatchers.status().isBadRequest())
+        .andExpect(MockMvcResultMatchers.content().json(
+            "[{\n"
+            + "    \"code\": \"ERROR004\",\n"
+            + "    \"message\": \"MissingParameter (ogrn)\"\n"
             + "}]\n"
             )
         );
@@ -346,11 +369,11 @@ public class SparkControllerTest {
         .andExpect(MockMvcResultMatchers.content().json(
             "[{\n"
             + "    \"code\": \"ERROR003\",\n"
-            + "    \"message\": \"InvalidFormat (ogrn)\"\n"
+            + "    \"message\": \"InvalidRequestFormat (ogrn)\"\n"
             + "},"
             + "{"
             + "   \"code\": \"ERROR003\",\n"
-            + "   \"message\": \"InvalidFormat (inn)\"\n"
+            + "   \"message\": \"InvalidRequestFormat (inn)\"\n"
             + "}]\n"
             )
         );
