@@ -50,6 +50,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                                                   WebRequest request) {
     Iterable<ErrorDto> errors = ex.getConstraintViolations().stream()
         .map(this::toErrorDto).collect(Collectors.toList());
+    errors.forEach(error -> log.warn(error.getMessage()));
     return handleExceptionInternal(ex, errors,
         new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
   }
@@ -62,7 +63,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                                                                 @NonNull WebRequest request) {
     Iterable<ErrorDto> errors = ex.getBindingResult().getAllErrors().stream()
         .map(this::toErrorDto).collect(Collectors.toList());
-
+    errors.forEach(error -> log.warn(error.getMessage()));
     return handleExceptionInternal(ex, errors,
         headers, status, request);
   }
@@ -78,14 +79,12 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
       errorCode = ErrorCode.ERROR003;
     }
     var message = String.format("%s (%s)", errorCode.label, ((FieldError) objectError).getField());
-    log.warn(message);
     return new ErrorDto(errorCode, message);
   }
 
   private ErrorDto toErrorDto(ConstraintViolation<?> violation) {
     var message = String.format("%s (%s)", violation.getMessageTemplate(),
         violation.getInvalidValue());
-    log.warn(message);
     return new ErrorDto(ErrorCode.ERROR003, message);
   }
 }

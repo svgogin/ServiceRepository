@@ -1,12 +1,6 @@
 package ru.svgogin.service.spark.web;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
@@ -23,8 +17,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.svgogin.service.spark.apirequests.CompanyRequest;
+import ru.svgogin.service.spark.apiresponses.AllCompaniesFoundResponse;
+import ru.svgogin.service.spark.apiresponses.CompanyAlreadyExistsResponse;
+import ru.svgogin.service.spark.apiresponses.CompanyDeletedResponse;
+import ru.svgogin.service.spark.apiresponses.CompanyNotFoundResponse;
+import ru.svgogin.service.spark.apiresponses.InvalidOrMissingBodyParamsResponse;
+import ru.svgogin.service.spark.apiresponses.InvalidPathAndBodyParamsResponse;
+import ru.svgogin.service.spark.apiresponses.InvalidPathParamResponse;
+import ru.svgogin.service.spark.apiresponses.SuccessfulResponse;
 import ru.svgogin.service.spark.dto.CompanyDto;
-import ru.svgogin.service.spark.errordto.ErrorDto;
 import ru.svgogin.service.spark.service.SparkService;
 
 @Tag(name = "Spark-service", description = "Spark API for companies data management")
@@ -40,41 +42,7 @@ public class SparkController {
   }
 
   @Operation(summary = "Gets all companies", tags = "Spark-service")
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Found all the companies",
-          content = {
-              @Content(
-                  examples = @ExampleObject(
-                      value = "[\n"
-                              + "    {\n"
-                              + "        \"id\": 1,\n"
-                              + "        \"inn\": \"7729355614\",\n"
-                              + "        \"ogrn\": \"1027700262270\",\n"
-                              + "        \"kpp\": \"997950001\",\n"
-                              + "        \"fullNameRus\": null,\n"
-                              + "        \"shortNameRus\": \"АО\\\"ДОМ.РФ\\\"\",\n"
-                              + "        \"statusName\": \"Действующая\",\n"
-                              + "        \"statusDate\": \"2020-11-30\"\n"
-                              + "    },\n"
-                              + "    {\n"
-                              + "        \"id\": 2,\n"
-                              + "        \"inn\": \"7725038124\",\n"
-                              + "        \"ogrn\": \"1037739527077\",\n"
-                              + "        \"kpp\": \"770401001\",\n"
-                              + "        \"fullNameRus\": "
-                              + "\"АКЦИОНЕРНОЕ ОБЩЕСТВО \\\"БАНК ДОМ.РФ\\\"\",\n"
-                              + "        \"shortNameRus\": \"АО\\\"БАНК ДОМ.РФ\\\"\",\n"
-                              + "        \"statusName\": \"Действующая\",\n"
-                              + "        \"statusDate\": \"2020-11-30\"\n"
-                              + "    }\n"
-                              + "]"
-                  ),
-                  mediaType = "application/json",
-                  array = @ArraySchema(schema = @Schema(implementation = CompanyDto.class)))
-          })
-  })
+  @AllCompaniesFoundResponse
   @GetMapping()
   public Iterable<CompanyDto> getCompanies() {
     log.info("getCompanies");
@@ -82,61 +50,9 @@ public class SparkController {
   }
 
   @Operation(summary = "Gets a company by inn", tags = "Spark-service")
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Found the company by inn",
-          content = {
-              @Content(
-                  examples = @ExampleObject(
-                      value = "{\n"
-                              + "    \"id\": 3,\n"
-                              + "    \"inn\": \"7729355614\",\n"
-                              + "    \"ogrn\": \"1027700262270\",\n"
-                              + "    \"kpp\": \"997950001\",\n"
-                              + "    \"fullNameRus\": null,\n"
-                              + "    \"shortNameRus\": \"АО\\\"ДОМ.РФ\\\"\",\n"
-                              + "    \"statusName\": \"Действующая\",\n"
-                              + "    \"statusDate\": \"2020-11-30\"\n"
-                              + "}"
-                  ),
-                  mediaType = "application/json",
-                  schema = @Schema(implementation = CompanyDto.class))
-          }),
-      @ApiResponse(
-          responseCode = "400",
-          description = "Invalid inn supplied",
-          content = {
-              @Content(
-                  examples = @ExampleObject(
-                      value = "[\n"
-                              + "    {\n"
-                              + "        \"code\": \"ERROR003\",\n"
-                              + "        \"message\": \"Inn should contain 10 or 12 digits (772)\""
-                              + "\n"
-                              + "    }\n"
-                              + "]"
-                  ),
-                  mediaType = "application/json",
-                  array = @ArraySchema(schema = @Schema(implementation = ErrorDto.class)))
-          }),
-      @ApiResponse(responseCode = "404",
-                   description = "Company not found",
-                   content = {
-                       @Content(
-                           examples = @ExampleObject(
-                               value = "[\n"
-                                       + "    {\n"
-                                       + "        \"code\": \"ERROR002\",\n"
-                                       + "        \"message\": \"NoSuchEntity (7729355618)\"\n"
-                                       + "    }\n"
-                                       + "]"
-                           ),
-                           mediaType = "application/json",
-                           array = @ArraySchema(schema = @Schema(implementation = ErrorDto.class)))
-                   })
-  })
-
+  @SuccessfulResponse
+  @InvalidPathParamResponse
+  @CompanyNotFoundResponse
   @GetMapping("/{inn}")
   public ResponseEntity<CompanyDto> getCompanyByInn(
       @PathVariable("inn")
@@ -147,89 +63,10 @@ public class SparkController {
   }
 
   @Operation(summary = "Creates a new company", tags = "Spark-service")
-  @io.swagger.v3.oas.annotations.parameters.RequestBody(
-      description = "Uses CompanyDto schema without parameter \"id\" "
-                    + "If id is passed by a client, ignores it and "
-                    + "returns id of created company from DB",
-      content = {
-          @Content(
-              examples = @ExampleObject(
-                  value = "{\n"
-                          + "    \"inn\": \"7729355614\",\n"
-                          + "    \"ogrn\": \"1027700262270\",\n"
-                          + "    \"kpp\": \"997950001\",\n"
-                          + "    \"fullNameRus\": null,\n"
-                          + "    \"shortNameRus\": \"АО\\\"ДОМ.РФ\\\"\",\n"
-                          + "    \"statusName\": \"Действующая\",\n"
-                          + "    \"statusDate\": \"2020-11-30\"\n"
-                          + "}"
-              ),
-              mediaType = "application/json",
-              schema = @Schema(implementation = CompanyDto.class))}
-  )
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Company created",
-          content = {
-              @Content(
-                  examples = @ExampleObject(
-                      value = "{\n"
-                              + "    \"id\": 3,\n"
-                              + "    \"inn\": \"7729355614\",\n"
-                              + "    \"ogrn\": \"1027700262270\",\n"
-                              + "    \"kpp\": \"997950001\",\n"
-                              + "    \"fullNameRus\": null,\n"
-                              + "    \"shortNameRus\": \"АО\\\"ДОМ.РФ\\\"\",\n"
-                              + "    \"statusName\": \"Действующая\",\n"
-                              + "    \"statusDate\": \"2020-11-30\"\n"
-                              + "}"
-                  ),
-                  mediaType = "application/json",
-                  schema = @Schema(implementation = CompanyDto.class))
-          }),
-      @ApiResponse(
-          responseCode = "400",
-          description = "Invalid inn, kpp or ogrn supplied or required parameter is absent. "
-                        + "Inn format is checked only in the request body",
-          content = {
-              @Content(
-                  examples = @ExampleObject(
-                      value = "[\n"
-                              + "    {\n"
-                              + "        \"code\": \"ERROR003\",\n"
-                              + "        \"message\": \"InvalidRequestFormat (ogrn)\"\n"
-                              + "    },\n"
-                              + "    {"
-                              + "        \"code\": \"ERROR003\",\n"
-                              + "        \"message\": \"InvalidRequestFormat (inn)\"\n"
-                              + "    },\n"
-                              + "    {"
-                              + "        \"code\": \"ERROR004\",\n"
-                              + "        \"message\": \"MissingParameter (kpp)\"\n"
-                              + "    }\n"
-                              + "]"
-                  ),
-                  mediaType = "application/json",
-                  array = @ArraySchema(schema = @Schema(implementation = ErrorDto.class)))
-          }),
-      @ApiResponse(responseCode = "409",
-                   description = "Company already exists",
-                   content = {
-                       @Content(
-                           examples = @ExampleObject(
-                               value = "[\n"
-                                       + "    {\n"
-                                       + "        \"code\": \"ERROR001\",\n"
-                                       + "        \"message\": \"EntityAlreadyExists (7729355618)\""
-                                       + "\n"
-                                       + "    }\n"
-                                       + "]"
-                           ),
-                           mediaType = "application/json",
-                           array = @ArraySchema(schema = @Schema(implementation = ErrorDto.class)))
-                   })
-  })
+  @CompanyRequest
+  @SuccessfulResponse
+  @InvalidOrMissingBodyParamsResponse
+  @CompanyAlreadyExistsResponse
   @PostMapping()
   public ResponseEntity<CompanyDto> saveCompany(@Valid @RequestBody CompanyDto companyDto) {
     log.info("saveCompany with inn " + companyDto.getInn());
@@ -237,93 +74,10 @@ public class SparkController {
   }
 
   @Operation(summary = "Updates a new company by inn (path parameter)", tags = "Spark-service")
-  @io.swagger.v3.oas.annotations.parameters.RequestBody(
-      description = "Uses CompanyDto schema without parameter \"id.\" "
-                    + "If id is passed by a client, ignores it and returns "
-                    + "id of a created company from DB",
-      content = {
-          @Content(
-              examples = @ExampleObject(
-                  value = "{\n"
-                          + "    \"inn\": \"7729355614\",\n"
-                          + "    \"ogrn\": \"1027700262270\",\n"
-                          + "    \"kpp\": \"997950001\",\n"
-                          + "    \"fullNameRus\": null,\n"
-                          + "    \"shortNameRus\": \"АО\\\"ДОМ.РФ\\\"\",\n"
-                          + "    \"statusName\": \"Действующая\",\n"
-                          + "    \"statusDate\": \"2020-11-30\"\n"
-                          + "}"
-              ),
-              mediaType = "application/json",
-              schema = @Schema(implementation = CompanyDto.class))}
-  )
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Company updated",
-          content = {
-              @Content(
-                  examples = @ExampleObject(
-                      value = "{\n"
-                              + "    \"id\": 3,\n"
-                              + "    \"inn\": \"7729355614\",\n"
-                              + "    \"ogrn\": \"1027700262270\",\n"
-                              + "    \"kpp\": \"997950001\",\n"
-                              + "    \"fullNameRus\": null,\n"
-                              + "    \"shortNameRus\": \"АО\\\"ДОМ.РФ\\\"\",\n"
-                              + "    \"statusName\": \"Действующая\",\n"
-                              + "    \"statusDate\": \"2020-11-30\"\n"
-                              + "}"
-                  ),
-                  mediaType = "application/json",
-                  schema = @Schema(implementation = CompanyDto.class))
-          }),
-      @ApiResponse(
-          responseCode = "400",
-          description = "Invalid inn, kpp or ogrn supplied or required parameter is absent. "
-                        + "Inn format is checked in both (path and body) parameters",
-          content = {
-              @Content(
-                  examples = @ExampleObject(
-                      value = "[\n"
-                              + "    {\n"
-                              + "        \"code\": \"ERROR003\",\n"
-                              + "        \"message\": \"Inn should contain 10 or 12 digits (772)\""
-                              + "\n"
-                              + "    },\n"
-                              + "    {\n"
-                              + "        \"code\": \"ERROR003\",\n"
-                              + "        \"message\": \"InvalidRequestFormat (ogrn)\"\n"
-                              + "    },\n"
-                              + "    {"
-                              + "        \"code\": \"ERROR003\",\n"
-                              + "        \"message\": \"InvalidRequestFormat (inn)\"\n"
-                              + "    },\n"
-                              + "    {"
-                              + "        \"code\": \"ERROR004\",\n"
-                              + "        \"message\": \"MissingParameter (kpp)\"\n"
-                              + "    }\n"
-                              + "]"
-                  ),
-                  mediaType = "application/json",
-                  array = @ArraySchema(schema = @Schema(implementation = ErrorDto.class)))
-          }),
-      @ApiResponse(responseCode = "404",
-                   description = "Company not found",
-                   content = {
-                       @Content(
-                           examples = @ExampleObject(
-                               value = "[\n"
-                                       + "    {\n"
-                                       + "        \"code\": \"ERROR002\",\n"
-                                       + "        \"message\": \"NoSuchEntity (7729355618)\"\n"
-                                       + "    }\n"
-                                       + "]"
-                           ),
-                           mediaType = "application/json",
-                           array = @ArraySchema(schema = @Schema(implementation = ErrorDto.class)))
-                   })
-  })
+  @CompanyRequest
+  @SuccessfulResponse
+  @InvalidPathAndBodyParamsResponse
+  @CompanyNotFoundResponse
   @PutMapping("/{inn}")
   public ResponseEntity<CompanyDto> updateCompany(
       @PathVariable("inn")
@@ -335,60 +89,9 @@ public class SparkController {
   }
 
   @Operation(summary = "Deletes a company by inn", tags = "Spark-service")
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Company deleted",
-          content = {
-              @Content(
-                  examples = @ExampleObject(
-                      value = "{\n"
-                              + "    \"id\": 3,\n"
-                              + "    \"inn\": \"7729355614\",\n"
-                              + "    \"ogrn\": \"1027700262270\",\n"
-                              + "    \"kpp\": \"997950001\",\n"
-                              + "    \"fullNameRus\": null,\n"
-                              + "    \"shortNameRus\": \"АО\\\"ДОМ.РФ\\\"\",\n"
-                              + "    \"statusName\": \"Действующая\",\n"
-                              + "    \"statusDate\": \"2020-11-30\"\n"
-                              + "}"
-                  ),
-                  mediaType = "application/json",
-                  schema = @Schema(implementation = CompanyDto.class))
-          }),
-      @ApiResponse(
-          responseCode = "400",
-          description = "Invalid inn supplied",
-          content = {
-              @Content(
-                  examples = @ExampleObject(
-                      value = "[\n"
-                              + "    {\n"
-                              + "        \"code\": \"ERROR003\",\n"
-                              + "        \"message\": \"Inn should contain 10 or 12 digits (772)\""
-                              + "\n"
-                              + "    }\n"
-                              + "]"
-                  ),
-                  mediaType = "application/json",
-                  array = @ArraySchema(schema = @Schema(implementation = ErrorDto.class)))
-          }),
-      @ApiResponse(responseCode = "404",
-                   description = "Company not found",
-                   content = {
-                       @Content(
-                           examples = @ExampleObject(
-                               value = "[\n"
-                                       + "    {\n"
-                                       + "        \"code\": \"ERROR002\",\n"
-                                       + "        \"message\": \"NoSuchEntity (7729355618)\"\n"
-                                       + "    }\n"
-                                       + "]"
-                           ),
-                           mediaType = "application/json",
-                           array = @ArraySchema(schema = @Schema(implementation = ErrorDto.class)))
-                   })
-  })
+  @CompanyDeletedResponse
+  @InvalidPathParamResponse
+  @CompanyNotFoundResponse
   @DeleteMapping("/{inn}")
   public ResponseEntity<CompanyDto> deleteCompany(
       @PathVariable("inn")
