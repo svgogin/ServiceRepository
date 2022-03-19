@@ -1,4 +1,4 @@
-package ru.svgogin.service.spark.apiresponses;
+package ru.svgogin.service.spark.api;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;

@@ -24,11 +24,11 @@ public class OpenApiConfig {
   public OpenAPI customOpenApi(@Value("Companies management API") String appDescription,
                                @Value("v1") String appVersion) {
     return new OpenAPI().info(new Info().title("Spark API")
-        .version(appVersion)
-        .description(appDescription)
-        .contact(new Contact().name("Gogin Sergei")
-            .email("goginsergei@mail.com")))
+            .version(appVersion)
+            .description(appDescription)
+            .contact(new Contact().name("Gogin Sergei")
+                .email("goginsergei@mail.com")))
         .servers(List.of(new Server().url("http://localhost:8080")
-                .description("Dev service")));
+            .description("Dev service")));
   }
 }

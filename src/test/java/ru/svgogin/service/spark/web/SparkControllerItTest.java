@@ -61,28 +61,28 @@ public class SparkControllerItTest {
         .andDo(print())
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.content().json(
-            """
-                [
-                  {
-                    "inn": "7725038124",
-                    "ogrn": "1037739527077",
-                    "kpp": "770401001",
-                    "fullNameRus": "АКЦИОНЕРНОЕ ОБЩЕСТВО \\"БАНК ДОМ.РФ\\"",
-                    "shortNameRus": "АО\\"БАНК ДОМ.РФ\\"",
-                    "statusName": "Действующая",
-                    "statusDate": "2020-11-30"
-                  },
-                    {
-                        "inn": "9705113553",
-                        "ogrn": "5177746290288",
-                        "kpp": "772501001",
-                        "fullNameRus": "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \\"СЕВЕНТЕК\\"",
-                        "shortNameRus": "ООО \\"7ТЕК\\"",
-                        "statusName": "Actual",
-                        "statusDate": "2021-01-30"
-                    }
-                    ]
                 """
+                    [
+                      {
+                        "inn": "7725038124",
+                        "ogrn": "1037739527077",
+                        "kpp": "770401001",
+                        "fullNameRus": "АКЦИОНЕРНОЕ ОБЩЕСТВО \\"БАНК ДОМ.РФ\\"",
+                        "shortNameRus": "АО\\"БАНК ДОМ.РФ\\"",
+                        "statusName": "Действующая",
+                        "statusDate": "2020-11-30"
+                      },
+                        {
+                            "inn": "9705113553",
+                            "ogrn": "5177746290288",
+                            "kpp": "772501001",
+                            "fullNameRus": "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \\"СЕВЕНТЕК\\"",
+                            "shortNameRus": "ООО \\"7ТЕК\\"",
+                            "statusName": "Actual",
+                            "statusDate": "2021-01-30"
+                        }
+                        ]
+                    """
             )
         );
   }
@@ -96,17 +96,17 @@ public class SparkControllerItTest {
         .andDo(print())
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.content().json(
-            """
-                {
-                    "inn": "7725038124",
-                    "ogrn": "1037739527077",
-                    "kpp": "770401001",
-                    "fullNameRus": "АКЦИОНЕРНОЕ ОБЩЕСТВО \\"БАНК ДОМ.РФ\\"",
-                    "shortNameRus": "АО\\"БАНК ДОМ.РФ\\"",
-                    "statusName": "Действующая",
-                    "statusDate": "2020-11-30"
-                  }
                 """
+                    {
+                        "inn": "7725038124",
+                        "ogrn": "1037739527077",
+                        "kpp": "770401001",
+                        "fullNameRus": "АКЦИОНЕРНОЕ ОБЩЕСТВО \\"БАНК ДОМ.РФ\\"",
+                        "shortNameRus": "АО\\"БАНК ДОМ.РФ\\"",
+                        "statusName": "Действующая",
+                        "statusDate": "2020-11-30"
+                      }
+                    """
             )
         );
   }
@@ -116,21 +116,7 @@ public class SparkControllerItTest {
     // given
     // when
     mockMvc.perform(MockMvcRequestBuilders.post("/spark/companies/")
-        .content("""
-            {
-                "inn": "7725038124",
-                "ogrn": "1037739527077",
-                "kpp": "770401001",
-                "fullNameRus": "АКЦИОНЕРНОЕ ОБЩЕСТВО \\"БАНК ДОМ.РФ\\"",
-                "shortNameRus": "АО\\"БАНК ДОМ.РФ\\"",
-                "statusName": "Действующая",
-                "statusDate": "2020-11-30"
-              }
-            """).contentType("application/json"))
-        .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.content().json(
-            """
+            .content("""
                 {
                     "inn": "7725038124",
                     "ogrn": "1037739527077",
@@ -140,7 +126,21 @@ public class SparkControllerItTest {
                     "statusName": "Действующая",
                     "statusDate": "2020-11-30"
                   }
+                """).contentType("application/json"))
+        .andDo(print())
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.content().json(
                 """
+                    {
+                        "inn": "7725038124",
+                        "ogrn": "1037739527077",
+                        "kpp": "770401001",
+                        "fullNameRus": "АКЦИОНЕРНОЕ ОБЩЕСТВО \\"БАНК ДОМ.РФ\\"",
+                        "shortNameRus": "АО\\"БАНК ДОМ.РФ\\"",
+                        "statusName": "Действующая",
+                        "statusDate": "2020-11-30"
+                      }
+                    """
             )
         );
 
@@ -167,22 +167,7 @@ public class SparkControllerItTest {
     var result = aggregateTemplate.insert(bank);
     // when
     mockMvc.perform(MockMvcRequestBuilders.put("/spark/companies/7725038124")
-        .content("""
-            {
-                    "inn": "9705113553",
-                    "ogrn": "5177746290288",
-                    "kpp": "772501001",
-                    "fullNameRus": "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \\"СЕВЕНТЕК\\"",
-                    "shortNameRus": "ООО \\"7ТЕК\\"",
-                    "statusName": "Actual",
-                    "statusDate": "2021-01-30"
-                }
-            """)
-        .contentType("application/json"))
-        .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.content().json(
-            """
+            .content("""
                 {
                         "inn": "9705113553",
                         "ogrn": "5177746290288",
@@ -192,7 +177,22 @@ public class SparkControllerItTest {
                         "statusName": "Actual",
                         "statusDate": "2021-01-30"
                     }
+                """)
+            .contentType("application/json"))
+        .andDo(print())
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.content().json(
                 """
+                    {
+                            "inn": "9705113553",
+                            "ogrn": "5177746290288",
+                            "kpp": "772501001",
+                            "fullNameRus": "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \\"СЕВЕНТЕК\\"",
+                            "shortNameRus": "ООО \\"7ТЕК\\"",
+                            "statusName": "Actual",
+                            "statusDate": "2021-01-30"
+                        }
+                    """
             )
         );
     // then
@@ -204,17 +204,17 @@ public class SparkControllerItTest {
     //given
     // when
     mockMvc.perform(MockMvcRequestBuilders.put("/spark/companies/7725038124")
-        .content("""
-            {
-                "inn": "7777777777",
-                "ogrn": "1037739527077",
-                "kpp": "888888888",
-                "fullNameRus": "АКЦИОНЕРНОЕ ОБЩЕСТВО \\"БАНК ДОМ.РФ\\"",
-                "shortNameRus": "АО\\"БАНК ДОМ.РФ\\"",
-                "statusName": "Действующая",
-                "statusDate": "2020-11-30"
-              }
-            """).contentType("application/json"))
+            .content("""
+                {
+                    "inn": "7777777777",
+                    "ogrn": "1037739527077",
+                    "kpp": "888888888",
+                    "fullNameRus": "АКЦИОНЕРНОЕ ОБЩЕСТВО \\"БАНК ДОМ.РФ\\"",
+                    "shortNameRus": "АО\\"БАНК ДОМ.РФ\\"",
+                    "statusName": "Действующая",
+                    "statusDate": "2020-11-30"
+                  }
+                """).contentType("application/json"))
         .andDo(print())
         .andExpect(MockMvcResultMatchers.status().isNotFound());
   }
@@ -247,17 +247,17 @@ public class SparkControllerItTest {
     aggregateTemplate.insert(bank);
     // when
     mockMvc.perform(MockMvcRequestBuilders.post("/spark/companies/")
-        .content("""
-            {
-                "inn": "7725038124",
-                "ogrn": "1037739527077",
-                "kpp": "770401001",
-                "fullNameRus": "АКЦИОНЕРНОЕ ОБЩЕСТВО \\"БАНК ДОМ.РФ\\"",
-                "shortNameRus": "АО\\"БАНК ДОМ.РФ\\"",
-                "statusName": "Действующая",
-                "statusDate": "2020-11-30"
-              }
-            """).contentType("application/json"))
+            .content("""
+                {
+                    "inn": "7725038124",
+                    "ogrn": "1037739527077",
+                    "kpp": "770401001",
+                    "fullNameRus": "АКЦИОНЕРНОЕ ОБЩЕСТВО \\"БАНК ДОМ.РФ\\"",
+                    "shortNameRus": "АО\\"БАНК ДОМ.РФ\\"",
+                    "statusName": "Действующая",
+                    "statusDate": "2020-11-30"
+                  }
+                """).contentType("application/json"))
         .andDo(print())
         .andExpect(MockMvcResultMatchers.status().isConflict())
         .andExpect(MockMvcResultMatchers.content().json(

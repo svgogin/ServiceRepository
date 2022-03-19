@@ -1,4 +1,4 @@
-package ru.svgogin.service.spark.apiresponses;
+package ru.svgogin.service.spark.api;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
@@ -20,7 +20,7 @@ import ru.svgogin.service.spark.dto.CompanyDto;
 @Inherited
 @ApiResponse(
     responseCode = "200",
-    description = "Company deleted",
+    description = "Ok",
     content = {
         @Content(
             examples = @ExampleObject(
@@ -39,5 +39,5 @@ import ru.svgogin.service.spark.dto.CompanyDto;
             mediaType = "application/json",
             schema = @Schema(implementation = CompanyDto.class))
     })
-public @interface CompanyDeletedResponse {
+public @interface SuccessfulResponse {
 }

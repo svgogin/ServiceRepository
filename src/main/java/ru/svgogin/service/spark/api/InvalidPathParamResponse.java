@@ -1,4 +1,4 @@
-package ru.svgogin.service.spark.apiresponses;
+package ru.svgogin.service.spark.api;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
@@ -21,9 +21,7 @@ import ru.svgogin.service.spark.errordto.ErrorDto;
 @Inherited
 @ApiResponse(
     responseCode = "400",
-    description = """
-                  Invalid inn (path or body parameter), kpp or ogrn supplied
-                  or required body parameter is absent.""",
+    description = "Invalid inn supplied in the path",
     content = {
         @Content(
             examples = @ExampleObject(
@@ -32,21 +30,11 @@ import ru.svgogin.service.spark.errordto.ErrorDto;
                         {
                             "code": "ERROR003",
                             "message": "Inn should contain 10 or 12 digits (772)"
-                        },
-                        {
-                            "code": "ERROR003",
-                            "message": "InvalidRequestBodyFormat (ogrn)"
-                        },
-                        {        "code": "ERROR003",
-                            "message": "InvalidRequestBodyFormat (inn)"
-                        },
-                        {        "code": "ERROR004",
-                            "message": "MissingParameter (kpp)"
                         }
                     ]"""
             ),
             mediaType = "application/json",
             array = @ArraySchema(schema = @Schema(implementation = ErrorDto.class)))
     })
-public @interface InvalidPathAndBodyParamsResponse {
+public @interface InvalidPathParamResponse {
 }

@@ -1,4 +1,4 @@
-package ru.svgogin.service.spark.apiresponses;
+package ru.svgogin.service.spark.api;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
@@ -19,17 +19,21 @@ import ru.svgogin.service.spark.errordto.ErrorDto;
 @Target({PARAMETER, METHOD, FIELD, ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@ApiResponse(responseCode = "404", description = "Company not found", content = @Content(
-    examples = @ExampleObject(
-        value = """
-            [
-                {
-                    "code": "ERROR002",
-                    "message": "NoSuchEntity (7729355618)"
-                }
-            ]"""
-    ),
-    mediaType = "application/json",
-    array = @ArraySchema(schema = @Schema(implementation = ErrorDto.class))))
-public @interface CompanyNotFoundResponse {
+@ApiResponse(responseCode = "409",
+             description = "Company already exists",
+             content = {
+                 @Content(
+                     examples = @ExampleObject(
+                         value = """
+                             [
+                                 {
+                                     "code": "ERROR001",
+                                     "message": "EntityAlreadyExists (7729355618)"
+                                 }
+                             ]"""
+                     ),
+                     mediaType = "application/json",
+                     array = @ArraySchema(schema = @Schema(implementation = ErrorDto.class)))
+             })
+public @interface CompanyAlreadyExistsResponse {
 }

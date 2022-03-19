@@ -29,6 +29,10 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
   private static final Logger log = LoggerFactory
       .getLogger(RestResponseEntityExceptionHandler.class);
 
+  private static void accept(ObjectError error) {
+    log.warn(error.toString(), error);
+  }
+
   @ExceptionHandler(value = {EntityAlreadyExistsException.class})
   protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
     var bodyOfResponse = List.of(new ErrorDto(ErrorCode.ERROR001, ex.getMessage()));
@@ -50,7 +54,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                                                   WebRequest request) {
     Iterable<ErrorDto> errors = ex.getConstraintViolations().stream()
         .map(this::toErrorDto).collect(Collectors.toList());
-    errors.forEach(error -> log.warn(error.getMessage()));
+    ex.getConstraintViolations().forEach(
+        constraintViolation -> log.warn(constraintViolation.toString()));
     return handleExceptionInternal(ex, errors,
         new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
   }
@@ -63,7 +68,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                                                                 @NonNull WebRequest request) {
     Iterable<ErrorDto> errors = ex.getBindingResult().getAllErrors().stream()
         .map(this::toErrorDto).collect(Collectors.toList());
-    errors.forEach(error -> log.warn(error.getMessage()));
+    ex.getBindingResult().getAllErrors().forEach(objectError -> log.warn(objectError.toString()));
     return handleExceptionInternal(ex, errors,
         headers, status, request);
   }
