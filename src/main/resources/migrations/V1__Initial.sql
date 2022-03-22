@@ -9,4 +9,3 @@ CREATE TABLE IF NOT EXISTS company
     status_name    text DEFAULT 'Actual'::text,
     status_date    date
 );
-

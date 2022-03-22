@@ -1,5 +1,7 @@
 package ru.svgogin.service.spark.web;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import org.slf4j.Logger;
@@ -15,9 +17,19 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.svgogin.service.spark.api.AllCompaniesFoundResponse;
+import ru.svgogin.service.spark.api.CompanyAlreadyExistsResponse;
+import ru.svgogin.service.spark.api.CompanyDeletedResponse;
+import ru.svgogin.service.spark.api.CompanyNotFoundResponse;
+import ru.svgogin.service.spark.api.CompanyRequest;
+import ru.svgogin.service.spark.api.InvalidOrMissingBodyParamsResponse;
+import ru.svgogin.service.spark.api.InvalidPathAndBodyParamsResponse;
+import ru.svgogin.service.spark.api.InvalidPathParamResponse;
+import ru.svgogin.service.spark.api.SuccessfulResponse;
 import ru.svgogin.service.spark.dto.CompanyDto;
 import ru.svgogin.service.spark.service.SparkService;
 
+@Tag(name = "Spark-service", description = "Spark API for companies data management")
 @RestController
 @RequestMapping("/spark/companies")
 @Validated
@@ -29,12 +41,18 @@ public class SparkController {
     this.sparkService = sparkService;
   }
 
+  @Operation(summary = "Gets all companies", tags = "Spark-service")
+  @AllCompaniesFoundResponse
   @GetMapping()
   public Iterable<CompanyDto> getCompanies() {
     log.info("getCompanies");
     return sparkService.findAll();
   }
 
+  @Operation(summary = "Gets a company by inn", tags = "Spark-service")
+  @SuccessfulResponse
+  @InvalidPathParamResponse
+  @CompanyNotFoundResponse
   @GetMapping("/{inn}")
   public ResponseEntity<CompanyDto> getCompanyByInn(
       @PathVariable("inn")
@@ -44,12 +62,22 @@ public class SparkController {
     return new ResponseEntity<>(sparkService.findByInn(inn), HttpStatus.OK);
   }
 
+  @Operation(summary = "Creates a new company", tags = "Spark-service")
+  @CompanyRequest
+  @SuccessfulResponse
+  @InvalidOrMissingBodyParamsResponse
+  @CompanyAlreadyExistsResponse
   @PostMapping()
   public ResponseEntity<CompanyDto> saveCompany(@Valid @RequestBody CompanyDto companyDto) {
     log.info("saveCompany with inn " + companyDto.getInn());
     return new ResponseEntity<>(sparkService.save(companyDto), HttpStatus.OK);
   }
 
+  @Operation(summary = "Updates a new company by inn (path parameter)", tags = "Spark-service")
+  @CompanyRequest
+  @SuccessfulResponse
+  @InvalidPathAndBodyParamsResponse
+  @CompanyNotFoundResponse
   @PutMapping("/{inn}")
   public ResponseEntity<CompanyDto> updateCompany(
       @PathVariable("inn")
@@ -60,6 +88,10 @@ public class SparkController {
     return new ResponseEntity<>(sparkService.update(inn, companyDto), HttpStatus.OK);
   }
 
+  @Operation(summary = "Deletes a company by inn", tags = "Spark-service")
+  @CompanyDeletedResponse
+  @InvalidPathParamResponse
+  @CompanyNotFoundResponse
   @DeleteMapping("/{inn}")
   public ResponseEntity<CompanyDto> deleteCompany(
       @PathVariable("inn")

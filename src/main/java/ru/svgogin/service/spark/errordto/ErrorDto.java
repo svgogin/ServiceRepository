@@ -21,7 +21,7 @@ public final class ErrorDto {
   public enum ErrorCode {
     ERROR001("EntityAlreadyExists"),
     ERROR002("NoSuchEntity"),
-    ERROR003("InvalidFormat"),
+    ERROR003("InvalidRequestBodyFormat"),
     ERROR004("MissingParameter");
 
     public final String label;
