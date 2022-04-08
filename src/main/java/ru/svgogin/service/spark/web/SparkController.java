@@ -27,6 +27,8 @@ import ru.svgogin.service.spark.api.InvalidPathAndBodyParamsResponse;
 import ru.svgogin.service.spark.api.InvalidPathParamResponse;
 import ru.svgogin.service.spark.api.SuccessfulResponse;
 import ru.svgogin.service.spark.dto.CompanyDto;
+import ru.svgogin.service.spark.security.AdminOnly;
+import ru.svgogin.service.spark.security.AllUsers;
 import ru.svgogin.service.spark.service.SparkService;
 
 @Tag(name = "Spark-service", description = "Spark API for companies data management")
@@ -44,8 +46,9 @@ public class SparkController {
   @Operation(summary = "Gets all companies", tags = "Spark-service")
   @AllCompaniesFoundResponse
   @GetMapping()
+  @AllUsers
   public Iterable<CompanyDto> getCompanies() {
-    log.info("getCompanies");
+    log.info("getCompanies method called");
     return sparkService.findAll();
   }
 
@@ -54,11 +57,12 @@ public class SparkController {
   @InvalidPathParamResponse
   @CompanyNotFoundResponse
   @GetMapping("/{inn}")
+  @AllUsers
   public ResponseEntity<CompanyDto> getCompanyByInn(
       @PathVariable("inn")
       @Pattern(regexp = "^(\\d{10}|\\d{12})$",
                message = "Inn should contain 10 or 12 digits") String inn) {
-    log.info("getCompanyByInn " + inn);
+    log.info("getCompanyByInn method called with inn" + inn);
     return new ResponseEntity<>(sparkService.findByInn(inn), HttpStatus.OK);
   }
 
@@ -68,8 +72,9 @@ public class SparkController {
   @InvalidOrMissingBodyParamsResponse
   @CompanyAlreadyExistsResponse
   @PostMapping()
+  @AllUsers
   public ResponseEntity<CompanyDto> saveCompany(@Valid @RequestBody CompanyDto companyDto) {
-    log.info("saveCompany with inn " + companyDto.getInn());
+    log.info("saveCompany method called with inn " + companyDto.getInn());
     return new ResponseEntity<>(sparkService.save(companyDto), HttpStatus.OK);
   }
 
@@ -79,12 +84,13 @@ public class SparkController {
   @InvalidPathAndBodyParamsResponse
   @CompanyNotFoundResponse
   @PutMapping("/{inn}")
+  @AdminOnly
   public ResponseEntity<CompanyDto> updateCompany(
       @PathVariable("inn")
       @Pattern(regexp = "^(\\d{10}|\\d{12})$",
                message = "Inn should contain 10 or 12 digits") String inn,
       @Valid @RequestBody CompanyDto companyDto) {
-    log.info("updateCompany " + companyDto.getInn());
+    log.info("updateCompany method called with inn" + companyDto.getInn());
     return new ResponseEntity<>(sparkService.update(inn, companyDto), HttpStatus.OK);
   }
 
@@ -93,11 +99,12 @@ public class SparkController {
   @InvalidPathParamResponse
   @CompanyNotFoundResponse
   @DeleteMapping("/{inn}")
+  @AdminOnly
   public ResponseEntity<CompanyDto> deleteCompany(
       @PathVariable("inn")
       @Pattern(regexp = "^(\\d{10}|\\d{12})$",
                message = "Inn should contain 10 or 12 digits") String inn) {
-    log.info("deleteCompany " + inn);
+    log.info("deleteCompany method called with inn" + inn);
     return new ResponseEntity<>(sparkService.delete(inn), HttpStatus.OK);
   }
 }

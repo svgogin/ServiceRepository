@@ -22,7 +22,10 @@ public final class ErrorDto {
     ERROR001("EntityAlreadyExists"),
     ERROR002("NoSuchEntity"),
     ERROR003("InvalidRequestBodyFormat"),
-    ERROR004("MissingParameter");
+    ERROR004("MissingParameter"),
+    ERROR005("InvalidAccessToken"),
+    ERROR006("IncorrectRole"),
+    ERROR007("TokenNotPassed");
 
     public final String label;
 

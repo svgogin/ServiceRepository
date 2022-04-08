@@ -12,11 +12,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import ru.svgogin.service.spark.errordto.ErrorDto;
@@ -58,6 +62,27 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         constraintViolation -> log.warn(constraintViolation.toString()));
     return handleExceptionInternal(ex, errors,
         new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+  }
+
+  @ExceptionHandler(value = {AccessDeniedException.class})
+  protected ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex,
+                                                      ServletWebRequest request) {
+    var bodyOfResponse = List.of(new ErrorDto(ErrorDto.ErrorCode.ERROR006,
+        ErrorDto.ErrorCode.ERROR006.label));
+
+    Authentication auth
+        = SecurityContextHolder.getContext().getAuthentication();
+
+
+    if (auth != null) {
+      log.warn("User: " + auth.getName()
+               + " has no privileges to access the protected URL: "
+               + request.getRequest().getRequestURI()
+               + " with roles:"
+               + auth.getAuthorities().toString());
+    }
+    return handleExceptionInternal(ex, bodyOfResponse,
+        new HttpHeaders(), HttpStatus.FORBIDDEN, request);
   }
 
   @NonNull

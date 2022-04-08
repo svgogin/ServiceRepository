@@ -3,15 +3,19 @@ package ru.svgogin.service.spark.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import java.time.LocalDate;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -46,12 +50,14 @@ public class SparkControllerItTest {
   @Autowired
   private SparkRepositoryDb sparkRepositoryDb;
 
+
   @AfterEach
   void tearDown() {
     aggregateTemplate.deleteAll(Company.class);
   }
 
   @Test
+  @WithMockUser(username = "admin", roles = {"admin"})
   void getCompaniesShouldReturnAllCompanies() throws Exception {
     // given
     aggregateTemplate.insert(bank);
@@ -88,6 +94,7 @@ public class SparkControllerItTest {
   }
 
   @Test
+  @WithMockUser(username = "admin", roles = {"admin"})
   void getCompanyByInnShouldReturnCompany() throws Exception {
     // given
     aggregateTemplate.insert(bank);
@@ -112,6 +119,7 @@ public class SparkControllerItTest {
   }
 
   @Test
+  @WithMockUser(username = "admin", roles = {"admin"})
   void saveCompanyShouldReturnCompanyWithCorrectArgs() throws Exception {
     // given
     // when
@@ -162,6 +170,7 @@ public class SparkControllerItTest {
   }
 
   @Test
+  @WithMockUser(username = "admin", roles = {"admin"})
   void updateCompanyShouldReturnUpdatedCompany() throws Exception {
     // given
     var result = aggregateTemplate.insert(bank);
@@ -200,6 +209,7 @@ public class SparkControllerItTest {
   }
 
   @Test
+  @WithMockUser(username = "admin", roles = {"admin"})
   void updateShouldReturn404IfNoCompanyForUpdate() throws Exception {
     //given
     // when
@@ -220,6 +230,7 @@ public class SparkControllerItTest {
   }
 
   @Test
+  @WithMockUser(username = "admin", roles = {"admin"})
   void deleteCompanyShouldDeleteEntities() throws Exception {
     // given
     var result = aggregateTemplate.insert(bank);
@@ -233,6 +244,7 @@ public class SparkControllerItTest {
   }
 
   @Test
+  @WithMockUser(username = "admin", roles = {"admin"})
   void deleteCompanyShouldReturn404ifNotExist() throws Exception {
     // given
     //when
@@ -242,6 +254,7 @@ public class SparkControllerItTest {
   }
 
   @Test
+  @WithMockUser(username = "admin", roles = {"admin"})
   void saveCompanyShouldThrowExceptionWhenExists() throws Exception {
     // given
     aggregateTemplate.insert(bank);
@@ -269,4 +282,83 @@ public class SparkControllerItTest {
                 """
         ));
   }
+
+  @Test
+  @WithMockUser(username = "admin", roles = {"admin"})
+  @DisplayName("FindAll should return Json value when authorized")
+  void getCompaniesShouldReturnOkForAuthorizedUsersWithCorrectRoles() throws Exception {
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/spark/companies"))
+        .andDo(print())
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.content().contentType(APPLICATION_JSON));
+  }
+
+  @Test
+  @DisplayName("FindAll should return 401 when authorization failed")
+  void getCompaniesShouldReturn401ForNotAuthorizedUsers() throws Exception {
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/spark/companies"))
+        .andDo(print())
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andExpect(MockMvcResultMatchers.content().json(
+            """
+                [{
+                    "code": "ERROR007",
+                    "message": "TokenNotPassed"
+                }]
+                """
+        ));
+  }
+
+  @Test
+  @WithMockUser(username = "user", roles = {"spark_api_user"})
+  @DisplayName("Update should return 403 if access denied")
+  void updateCompaniesShouldReturnForbiddenWithIncorrectRoles() throws Exception {
+    // given
+    var result = aggregateTemplate.insert(bank);
+    // when
+    mockMvc.perform(MockMvcRequestBuilders.put("/spark/companies/7725038124")
+            .content("""
+                {
+                        "inn": "9705113553",
+                        "ogrn": "5177746290288",
+                        "kpp": "772501001",
+                        "fullNameRus": "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \\"СЕВЕНТЕК\\"",
+                        "shortNameRus": "ООО \\"7ТЕК\\"",
+                        "statusName": "Actual",
+                        "statusDate": "2021-01-30"
+                    }
+                """)
+            .contentType("application/json"))
+        .andDo(print())
+        .andExpect(MockMvcResultMatchers.status().isForbidden())
+        .andExpect(MockMvcResultMatchers.content().json(
+            """
+            [{
+            "code": "ERROR006",
+            "message": "IncorrectRole"
+            }]
+            """
+            )
+        );
+  }
+
+  @Test
+  @DisplayName("Update should return 401 when no token passed")
+  void deleteCompaniesShouldReturn401WithInvalidAccessToken() throws Exception {
+
+    mockMvc.perform(MockMvcRequestBuilders.delete("/spark/companies/7725038124").header(HttpHeaders.AUTHORIZATION, "Bearer InvalidAccessToken"))
+        .andDo(print())
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andExpect(MockMvcResultMatchers.content().json(
+        """
+            [{
+                "code": "ERROR005",
+                "message": "InvalidAccessToken"
+            }]
+            """
+    ));
+  }
 }
+
