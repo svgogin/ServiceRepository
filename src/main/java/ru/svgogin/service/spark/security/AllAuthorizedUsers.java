@@ -9,5 +9,5 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @PreAuthorize("hasRole('admin') or hasRole('spark_api_user')")
-public @interface AllUsers {
+public @interface AllAuthorizedUsers {
 }

@@ -12,7 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
-import ru.svgogin.service.spark.handler.CustomAuthenticationFailureHandler;
+import ru.svgogin.service.spark.handler.RestResponseEntityExceptionHandler;
 
 @KeycloakConfiguration
 @EnableGlobalMethodSecurity(
@@ -39,7 +39,7 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
       throws Exception {
 
     var filter = super.keycloakAuthenticationProcessingFilter();
-    filter.setAuthenticationFailureHandler(new CustomAuthenticationFailureHandler());
+    filter.setAuthenticationFailureHandler(new RestResponseEntityExceptionHandler());
     return filter;
   }
 
@@ -48,13 +48,10 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     super.configure(http);
     http
         .authorizeRequests()
-        .anyRequest()
-        .authenticated()
+        .anyRequest().authenticated()
         .and()
-        .csrf()
-        .disable()
-        .formLogin()
-        .disable()
+        .csrf().disable()
+        .formLogin().disable()
         .exceptionHandling()
         .authenticationEntryPoint(new CustomAuthenticationEntryPoint());
   }

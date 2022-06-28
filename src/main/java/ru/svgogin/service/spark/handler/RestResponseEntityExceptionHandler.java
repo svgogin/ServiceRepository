@@ -1,9 +1,15 @@
 package ru.svgogin.service.spark.handler;
 
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -14,7 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -29,7 +37,8 @@ import ru.svgogin.service.spark.exception.EntityAlreadyExistsException;
 import ru.svgogin.service.spark.exception.NoSuchEntityException;
 
 @ControllerAdvice
-public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler implements
+    AuthenticationFailureHandler {
   private static final Logger log = LoggerFactory
       .getLogger(RestResponseEntityExceptionHandler.class);
 
@@ -75,11 +84,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
 
     if (auth != null) {
-      log.warn("User: " + auth.getName()
-               + " has no privileges to access the protected URL: "
-               + request.getRequest().getRequestURI()
-               + " with roles:"
-               + auth.getAuthorities().toString());
+      log.warn("User: {} has no privileges to access the protected URL: {} with roles: {}",
+          auth.getName(), request.getRequest().getRequestURI(), auth.getAuthorities());
     }
     return handleExceptionInternal(ex, bodyOfResponse,
         new HttpHeaders(), HttpStatus.FORBIDDEN, request);
@@ -96,6 +102,25 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     ex.getBindingResult().getAllErrors().forEach(objectError -> log.warn(objectError.toString()));
     return handleExceptionInternal(ex, errors,
         headers, status, request);
+  }
+
+  @Override
+  public void onAuthenticationFailure(HttpServletRequest request,
+                                      HttpServletResponse response,
+                                      AuthenticationException ex) throws IOException {
+    final ObjectMapper objectMapper = new ObjectMapper();
+
+    log.warn("Request: "
+             + request.getMethod()
+             + request.getRequestURI()
+             + " failed because of "
+             + ErrorCode.ERROR005.label);
+
+    var bodyOfResponse = List.of(new ErrorDto(ErrorCode.ERROR005, ErrorCode.ERROR005.label));
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
+    response.getOutputStream().println(objectMapper.writeValueAsString(bodyOfResponse));
+    response.setStatus(UNAUTHORIZED.value());
   }
 
   private ErrorDto toErrorDto(ObjectError objectError) {
