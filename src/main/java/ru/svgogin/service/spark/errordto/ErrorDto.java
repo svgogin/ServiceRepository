@@ -4,8 +4,12 @@ public final class ErrorDto {
   private final ErrorCode code;
   private final String message;
 
-  public ErrorDto(ErrorCode code, String message) {
+  public ErrorDto(ErrorCode code) {
+    this.code = code;
+    this.message = code.label;
+  }
 
+  public ErrorDto(ErrorCode code, String message) {
     this.code = code;
     this.message = message;
   }
@@ -22,7 +26,10 @@ public final class ErrorDto {
     ERROR001("EntityAlreadyExists"),
     ERROR002("NoSuchEntity"),
     ERROR003("InvalidRequestBodyFormat"),
-    ERROR004("MissingParameter");
+    ERROR004("MissingParameter"),
+    ERROR005("InvalidAccessToken"),
+    ERROR006("IncorrectRole"),
+    ERROR007("TokenNotPassed");
 
     public final String label;
 

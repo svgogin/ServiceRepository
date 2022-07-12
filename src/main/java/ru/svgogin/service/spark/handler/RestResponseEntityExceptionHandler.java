@@ -1,9 +1,21 @@
 package ru.svgogin.service.spark.handler;
 
+import static java.util.Optional.ofNullable;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static ru.svgogin.service.spark.errordto.ErrorDto.ErrorCode.ERROR001;
+import static ru.svgogin.service.spark.errordto.ErrorDto.ErrorCode.ERROR002;
+import static ru.svgogin.service.spark.errordto.ErrorDto.ErrorCode.ERROR003;
+import static ru.svgogin.service.spark.errordto.ErrorDto.ErrorCode.ERROR004;
+import static ru.svgogin.service.spark.errordto.ErrorDto.ErrorCode.ERROR005;
+import static ru.svgogin.service.spark.errordto.ErrorDto.ErrorCode.ERROR006;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -12,11 +24,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import ru.svgogin.service.spark.errordto.ErrorDto;
@@ -25,17 +42,14 @@ import ru.svgogin.service.spark.exception.EntityAlreadyExistsException;
 import ru.svgogin.service.spark.exception.NoSuchEntityException;
 
 @ControllerAdvice
-public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler implements
+    AuthenticationFailureHandler {
   private static final Logger log = LoggerFactory
       .getLogger(RestResponseEntityExceptionHandler.class);
 
-  private static void accept(ObjectError error) {
-    log.warn(error.toString(), error);
-  }
-
   @ExceptionHandler(value = {EntityAlreadyExistsException.class})
   protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
-    var bodyOfResponse = List.of(new ErrorDto(ErrorCode.ERROR001, ex.getMessage()));
+    var bodyOfResponse = List.of(new ErrorDto(ERROR001, ex.getMessage()));
     log.warn(ex.getMessage());
     return handleExceptionInternal(ex, bodyOfResponse,
         new HttpHeaders(), HttpStatus.CONFLICT, request);
@@ -43,7 +57,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
   @ExceptionHandler(value = {NoSuchEntityException.class})
   protected ResponseEntity<Object> handleNotFound(RuntimeException ex, WebRequest request) {
-    var bodyOfResponse = List.of(new ErrorDto(ErrorCode.ERROR002, ex.getMessage()));
+    var bodyOfResponse = List.of(new ErrorDto(ERROR002, ex.getMessage()));
     log.warn(ex.getMessage());
     return handleExceptionInternal(ex, bodyOfResponse,
         new HttpHeaders(), HttpStatus.NOT_FOUND, request);
@@ -60,6 +74,21 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
   }
 
+  @ExceptionHandler(value = {AccessDeniedException.class})
+  protected ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex,
+                                                      ServletWebRequest request) {
+    var bodyOfResponse = List.of(new ErrorDto(ERROR006));
+
+    var auth = SecurityContextHolder.getContext().getAuthentication();
+
+    if (auth != null) {
+      log.warn("User: {} has no privileges to access the protected URL: {} with roles: {}",
+          auth.getName(), request.getRequest().getRequestURI(), auth.getAuthorities());
+    }
+    return handleExceptionInternal(ex, bodyOfResponse,
+        new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+  }
+
   @NonNull
   @Override
   protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
@@ -73,15 +102,33 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         headers, status, request);
   }
 
+  @Override
+  public void onAuthenticationFailure(HttpServletRequest request,
+                                      HttpServletResponse response,
+                                      AuthenticationException ex) throws IOException {
+    final ObjectMapper objectMapper = new ObjectMapper();
+
+    log.warn("Request: {} with URI {} failed because of {}",
+        request.getMethod(),
+        request.getRequestURI(),
+        ERROR005.label);
+
+    var bodyOfResponse = List.of(new ErrorDto(ERROR005));
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
+    response.getOutputStream().println(objectMapper.writeValueAsString(bodyOfResponse));
+    response.setStatus(UNAUTHORIZED.value());
+  }
+
   private ErrorDto toErrorDto(ObjectError objectError) {
     ErrorCode errorCode;
-    var notBlankExists = Optional.ofNullable(objectError.getCodes())
+    var notBlankExists = ofNullable(objectError.getCodes())
         .map(codes -> Set.of(codes).contains("NotBlank"))
         .orElse(false);
     if (notBlankExists) {
-      errorCode = ErrorCode.ERROR004;
+      errorCode = ERROR004;
     } else {
-      errorCode = ErrorCode.ERROR003;
+      errorCode = ERROR003;
     }
     var message = String.format("%s (%s)", errorCode.label, ((FieldError) objectError).getField());
     return new ErrorDto(errorCode, message);
@@ -90,6 +137,6 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
   private ErrorDto toErrorDto(ConstraintViolation<?> violation) {
     var message = String.format("%s (%s)", violation.getMessageTemplate(),
         violation.getInvalidValue());
-    return new ErrorDto(ErrorCode.ERROR003, message);
+    return new ErrorDto(ERROR003, message);
   }
 }

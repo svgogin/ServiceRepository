@@ -7,7 +7,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -16,16 +19,30 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.svgogin.service.spark.dto.CompanyDto;
 import ru.svgogin.service.spark.exception.NoSuchEntityException;
+import ru.svgogin.service.spark.security.WebSecurityConfig;
 import ru.svgogin.service.spark.service.SparkService;
 
-@WebMvcTest(value = SparkController.class)
+@WebMvcTest(controllers = SparkController.class,
+            excludeAutoConfiguration = SecurityAutoConfiguration.class,
+            excludeFilters =
+                {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = WebSecurityConfigurer.class)})
 public class SparkControllerTest {
 
   private final CompanyDto bankDto = new CompanyDto(
@@ -49,10 +66,10 @@ public class SparkControllerTest {
     // given
     when(sparkService.findAll()).thenReturn(List.of(bankDto));
     // when
-    mockMvc.perform(MockMvcRequestBuilders.get("/spark/companies"))
+    mockMvc.perform(get("/spark/companies"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.content().json(
+        .andExpect(status().isOk())
+        .andExpect(content().json(
             """
                 [
                   {
@@ -76,10 +93,10 @@ public class SparkControllerTest {
     // given
     when(sparkService.findByInn("7725038124")).thenReturn(bankDto);
     // when
-    mockMvc.perform(MockMvcRequestBuilders.get("/spark/companies/7725038124"))
+    mockMvc.perform(get("/spark/companies/7725038124"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.content().json(
+        .andExpect(status().isOk())
+        .andExpect(content().json(
                 """
                     {
                         "inn": "7725038124",
@@ -103,7 +120,7 @@ public class SparkControllerTest {
     // given
     when(sparkService.save(any())).then(returnsFirstArg());
     // when
-    mockMvc.perform(MockMvcRequestBuilders.post("/spark/companies/")
+    mockMvc.perform(post("/spark/companies/")
             .content("""
                 {
                     "inn": "7725038124",
@@ -116,8 +133,8 @@ public class SparkControllerTest {
                   }
                 """).contentType("application/json"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.content().json(
+        .andExpect(status().isOk())
+        .andExpect(content().json(
                 """
                     {
                         "inn": "7725038124",
@@ -152,7 +169,7 @@ public class SparkControllerTest {
     // given
     when(sparkService.update(any(), any())).thenReturn(bankDto);
     // when
-    mockMvc.perform(MockMvcRequestBuilders.put("/spark/companies/7725038124")
+    mockMvc.perform(put("/spark/companies/7725038124")
             .content("""
                 {
                     "inn": "7777777777",
@@ -166,7 +183,7 @@ public class SparkControllerTest {
                 """)
             .contentType("application/json"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isOk());
+        .andExpect(status().isOk());
 
     // then
     verify(sparkService).update(any(), companyDtoArgumentCaptor.capture());
@@ -188,7 +205,7 @@ public class SparkControllerTest {
     //given
     when(sparkService.update(any(), any())).thenThrow(NoSuchEntityException.class);
     // when
-    mockMvc.perform(MockMvcRequestBuilders.put("/spark/companies/7725038124")
+    mockMvc.perform(put("/spark/companies/7725038124")
             .content("""
                 {
                     "inn": "7777777777",
@@ -201,7 +218,7 @@ public class SparkControllerTest {
                   }
                 """).contentType("application/json"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isNotFound());
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -209,9 +226,9 @@ public class SparkControllerTest {
     // given
     when(sparkService.delete(any())).thenReturn(bankDto);
     //when
-    mockMvc.perform(MockMvcRequestBuilders.delete("/spark/companies/7725038124"))
+    mockMvc.perform(delete("/spark/companies/7725038124"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isOk());
+        .andExpect(status().isOk());
     //then
     verify(sparkService).delete(argThat(inn -> inn.equals("7725038124")));
   }
@@ -221,18 +238,18 @@ public class SparkControllerTest {
     // given
     when(sparkService.delete(any())).thenThrow(NoSuchEntityException.class);
     //when
-    mockMvc.perform(MockMvcRequestBuilders.delete("/spark/companies/9772503812"))
+    mockMvc.perform(delete("/spark/companies/9772503812"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isNotFound());
+        .andExpect(status().isNotFound());
   }
 
   @Test
   void getCompanyByInnShouldThrowException_WhenPathInnIsNotValid() throws Exception {
     // when
-    mockMvc.perform(MockMvcRequestBuilders.get("/spark/companies/77725038124"))
+    mockMvc.perform(get("/spark/companies/77725038124"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isBadRequest())
-        .andExpect(MockMvcResultMatchers.content().json(
+        .andExpect(status().isBadRequest())
+        .andExpect(content().json(
                 """
                     [{
                         "code": "ERROR003",
@@ -246,7 +263,7 @@ public class SparkControllerTest {
   @Test
   void saveCompanyShouldThrowException_WhenOgrnInBodyIsNotValid() throws Exception {
     // when
-    mockMvc.perform(MockMvcRequestBuilders.post("/spark/companies/")
+    mockMvc.perform(post("/spark/companies/")
             .content("""
                 {
                     "inn": "7725038124",
@@ -259,8 +276,8 @@ public class SparkControllerTest {
                   }
                 """).contentType("application/json"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isBadRequest())
-        .andExpect(MockMvcResultMatchers.content().json(
+        .andExpect(status().isBadRequest())
+        .andExpect(content().json(
                 """
                     [{
                         "code": "ERROR003",
@@ -274,7 +291,7 @@ public class SparkControllerTest {
   @Test
   void saveCompanyShouldThrowException_WhenInnInBodyIsNotValid() throws Exception {
     // when
-    mockMvc.perform(MockMvcRequestBuilders.post("/spark/companies/")
+    mockMvc.perform(post("/spark/companies/")
             .content("""
                 {
                     "inn": "77250381240",
@@ -287,8 +304,8 @@ public class SparkControllerTest {
                   }
                 """).contentType("application/json"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isBadRequest())
-        .andExpect(MockMvcResultMatchers.content().json(
+        .andExpect(status().isBadRequest())
+        .andExpect(content().json(
                 """
                     [{
                         "code": "ERROR003",
@@ -302,7 +319,7 @@ public class SparkControllerTest {
   @Test
   void saveCompanyShouldThrowException_WhenKppInBodyIsNotValid() throws Exception {
     // when
-    mockMvc.perform(MockMvcRequestBuilders.post("/spark/companies/")
+    mockMvc.perform(post("/spark/companies/")
             .content("""
                 {
                     "inn": "7725038120",
@@ -315,8 +332,8 @@ public class SparkControllerTest {
                   }
                 """).contentType("application/json"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isBadRequest())
-        .andExpect(MockMvcResultMatchers.content().json(
+        .andExpect(status().isBadRequest())
+        .andExpect(content().json(
                 """
                     [{
                         "code": "ERROR003",
@@ -330,7 +347,7 @@ public class SparkControllerTest {
   @Test
   void saveCompanyShouldThrowException_WhenOgrnInBodyIsMissing() throws Exception {
     // when
-    mockMvc.perform(MockMvcRequestBuilders.post("/spark/companies/")
+    mockMvc.perform(post("/spark/companies/")
             .content("""
                 {
                     "inn": "7725038120",
@@ -342,8 +359,8 @@ public class SparkControllerTest {
                   }
                 """).contentType("application/json"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isBadRequest())
-        .andExpect(MockMvcResultMatchers.content().json(
+        .andExpect(status().isBadRequest())
+        .andExpect(content().json(
                 """
                     [{
                         "code": "ERROR004",
@@ -357,7 +374,7 @@ public class SparkControllerTest {
   @Test
   void updateCompanyShouldThrowException_WhenPathInnIsNotValid() throws Exception {
     // when
-    mockMvc.perform(MockMvcRequestBuilders.put("/spark/companies/77250381242")
+    mockMvc.perform(put("/spark/companies/77250381242")
             .content("""
                 {
                         "inn": "9705113553",
@@ -371,8 +388,8 @@ public class SparkControllerTest {
                 """)
             .contentType("application/json"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isBadRequest())
-        .andExpect(MockMvcResultMatchers.content().json(
+        .andExpect(status().isBadRequest())
+        .andExpect(content().json(
                 """
                     [{
                         "code": "ERROR003",
@@ -386,7 +403,7 @@ public class SparkControllerTest {
   @Test
   void updateCompanyShouldThrowException_WhenBodyIsNotValid() throws Exception {
     // when
-    mockMvc.perform(MockMvcRequestBuilders.put("/spark/companies/7725038124")
+    mockMvc.perform(put("/spark/companies/7725038124")
             .content("""
                 {
                         "inn": "97051135531",
@@ -400,8 +417,8 @@ public class SparkControllerTest {
                 """)
             .contentType("application/json"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isBadRequest())
-        .andExpect(MockMvcResultMatchers.content().json(
+        .andExpect(status().isBadRequest())
+        .andExpect(content().json(
                 """
                     [{
                         "code": "ERROR003",
@@ -418,10 +435,10 @@ public class SparkControllerTest {
   void deleteCompanyByInnShouldThrowException_WhenPathInnIsNotValid() throws Exception {
     // given
     // when
-    mockMvc.perform(MockMvcRequestBuilders.delete("/spark/companies/77725038120"))
+    mockMvc.perform(delete("/spark/companies/77725038120"))
         .andDo(print())
-        .andExpect(MockMvcResultMatchers.status().isBadRequest())
-        .andExpect(MockMvcResultMatchers.content().json(
+        .andExpect(status().isBadRequest())
+        .andExpect(content().json(
                 """
                     [{
                         "code": "ERROR003",
