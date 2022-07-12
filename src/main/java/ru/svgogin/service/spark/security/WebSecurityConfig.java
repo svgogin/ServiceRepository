@@ -37,7 +37,6 @@ public class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
   @Override
   protected KeycloakAuthenticationProcessingFilter keycloakAuthenticationProcessingFilter()
       throws Exception {
-
     var filter = super.keycloakAuthenticationProcessingFilter();
     filter.setAuthenticationFailureHandler(new RestResponseEntityExceptionHandler());
     return filter;

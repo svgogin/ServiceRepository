@@ -1,7 +1,7 @@
 package ru.svgogin.service.spark.security;
 
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-import static ru.svgogin.service.spark.errordto.ErrorDto.ErrorCode;
+import static ru.svgogin.service.spark.errordto.ErrorDto.ErrorCode.ERROR007;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -25,14 +25,12 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
                        AuthenticationException ex)
       throws IOException {
 
-    log.warn(
-        "Request: "
-        + request.getMethod()
-        + request.getRequestURI()
-        + "failed because of"
-        + ErrorCode.ERROR007.label);
+    log.warn("{} {} request failed because of: {}",
+        request.getMethod(),
+        request.getRequestURI(),
+        ERROR007.label);
 
-    var bodyOfResponse = List.of(new ErrorDto(ErrorCode.ERROR007, ErrorCode.ERROR007.label));
+    var bodyOfResponse = List.of(new ErrorDto(ERROR007));
 
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");

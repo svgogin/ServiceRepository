@@ -4,8 +4,12 @@ public final class ErrorDto {
   private final ErrorCode code;
   private final String message;
 
-  public ErrorDto(ErrorCode code, String message) {
+  public ErrorDto(ErrorCode code) {
+    this.code = code;
+    this.message = code.label;
+  }
 
+  public ErrorDto(ErrorCode code, String message) {
     this.code = code;
     this.message = message;
   }
